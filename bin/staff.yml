@@ -1,0 +1,43 @@
+command-spy:
+  enabled: false # When disabled, the command isn't usable even by those with the permission
+  # Commands in the blacklist can't be spyed on, unless
+  # the user has wbsextras.staff.commandspy.ignore-blacklist
+  blacklist:
+  - login # If you don't want to blacklist any commands, you can comment out this section
+  
+# Tracks item pick ups and drops for each player. Useful if you're worried about illegal
+# items or can't find where a player got items from.
+item-history:
+  enabled: false
+  # Only the last n item pick ups and item drops are tracked. this is how many are stored at a
+  # time. Item history is not saved after server restart, so don't need to worry about disk
+  # memory.
+  amount: 50
+
+# Players with wbsextras.staff.lastcommand may use /lastcommand <username> [amount] to
+# view the last [amount] commands run by <username>. You can configure the tracking
+# here!
+last-command:
+  enabled: false # When disabled, commands won't be tracked and the command will do nothing.
+  # Only the last n commands are stored. This is how many are stored at a time. Last command
+  # is stored even past server restart; high numbers may create large data files for large
+  # player bases.
+  amount: 5 
+  blacklist: # Commands to ignore. Players with wbsextras.staff.lastcommand.exempt will never be tracked.
+  - message
+  - msg
+  - r
+  - tell
+  - t
+  - whisper
+  
+staff-chat:
+  enabled: false
+  # When a player with wbsextras.staff.chat puts this character at the start of their message,
+  # it will only be visible to other players with the same permission.
+  character: '#' 
+  # What to display before the player's display name
+  prefix: '&3[Staff] &7'
+  # What to display after the name. The last colour in this will be the colour of the chat
+  # message. For example, setting this to '&7: &d' will make the chat message pink.
+  suffix: '&7: &f' 
