@@ -1,0 +1,38 @@
+# This config affects chat based extras.
+# By default, all extras are disabled!
+
+# When enabled, you give people with wbsextras.chat.grave the ability to put a `
+# on either side of a phrase in chat. Everything between those letters will be
+# the colour you choose here.
+grave-highlighting:
+  enabled: false
+  colour: 'b'
+  
+
+chat-coords:
+  enabled: false
+  permission: 'wbsextras.chat.coords'
+
+# This option notifies players of words in chat.
+# Notifications are per-player, and won't change messages for other players.
+chat-notifier:
+  enabled: false
+  default-settings:
+    notify-name: true
+    require-at-symbol: false # Whether the name notification requires @ at the start. (i.e. "@Notch" vs just "Notch")  
+
+# Replace specific phrases in chat, with a customizable permission
+chat-replacements:
+  enabled: false
+  replacements:
+    fire: # The internal name of your replacement
+      # What permission the player needs to use the replacement.
+      # Set to '' or remove this line to let anyone use it.
+      permission: 'wbsextras.chat.replace.fire' 
+      ignore-case: true # Whether or not 'Fire' should be caught when searching for 'fire'
+      catch: # A list of things to replace if they have the permission
+      - ':fire:'
+      - ':flames:'
+      - ':flame:'
+      # Set this to what the caught string should become: It will translate & codes automatically
+      replace: '&4&k&n;&6&k&n;&e&k&no&6&k&n;&4&k&n;'
