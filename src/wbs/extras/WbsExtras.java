@@ -23,7 +23,7 @@ public class WbsExtras extends WbsPlugin {
 		return essentialsInstalled;
 	}
 	
-    private static Economy econ = null;
+	private static Economy econ = null;
 	public static Economy getEconomy() {
 		return econ;
 	}
@@ -35,7 +35,7 @@ public class WbsExtras extends WbsPlugin {
 	public ExtrasSettings settings;
 	
 	@Override
-    public void onEnable() {
+	public void onEnable() {
 		if (!getDataFolder().exists()) {
 			getDataFolder().mkdir();
 		}
@@ -49,24 +49,24 @@ public class WbsExtras extends WbsPlugin {
 		
 		startBackupTimers();
 		
-        if (!setupEconomy()) {
-            logger.severe("No Vault dependency found! Monetary commands disabled.");
-        }
-        if (!setupEssentials()) {
-            logger.info("Essentials not found.");
-        }
-        
+		if (!setupEconomy()) {
+			logger.severe("No Vault dependency found! Monetary commands disabled.");
+		}
+		if (!setupEssentials()) {
+			logger.info("Essentials not found.");
+		}
+		
 		getCommand("lastcommand").setExecutor(new LastCommandCommand(this));
 		getCommand("lastcommand").setTabCompleter(new LastCommandCommand(this));
 
 		getCommand("itemhistory").setExecutor(new ItemHistoryCommand(this));
 		getCommand("itemhistory").setTabCompleter(new ItemHistoryCommand(this));
 		
-	    PluginManager pm = Bukkit.getServer().getPluginManager();
-	    pm.registerEvents(new ChatListener(this), this);
-	    pm.registerEvents(new MiscListener(this), this);
-	    pm.registerEvents(new StaffListener(this), this);
-    }
+		PluginManager pm = Bukkit.getServer().getPluginManager();
+		pm.registerEvents(new ChatListener(this), this);
+		pm.registerEvents(new MiscListener(this), this);
+		pm.registerEvents(new StaffListener(this), this);
+	}
 	
 	private void startBackupTimers() {
 		new BukkitRunnable() {
@@ -82,28 +82,28 @@ public class WbsExtras extends WbsPlugin {
 	}
 
 	private boolean setupEssentials() {
-        if (getServer().getPluginManager().getPlugin("Essentials") == null) {
-            return false;
-        }
-        essentialsInstalled = true;
-        return true;
+		if (getServer().getPluginManager().getPlugin("Essentials") == null) {
+			return false;
+		}
+		essentialsInstalled = true;
+		return true;
 	}
 	
 	private boolean setupEconomy() {
-        if (getServer().getPluginManager().getPlugin("Vault") == null) {
-            return false;
-        }
-        RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
-        if (rsp == null) {
-            return false;
-        }
-        econ = rsp.getProvider();
-        return econ != null;
-    }
+		if (getServer().getPluginManager().getPlugin("Vault") == null) {
+			return false;
+		}
+		RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
+		if (rsp == null) {
+			return false;
+		}
+		econ = rsp.getProvider();
+		return econ != null;
+	}
 	
-    @Override
-    public void onDisable() {
+	@Override
+	public void onDisable() {
 		PlayerData.saveAll();
-    	BarAnnouncement.stop();
-    }
+		BarAnnouncement.stop();
+	}
 }
