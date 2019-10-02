@@ -3,9 +3,12 @@ package wbs.extras.player;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.logging.Logger;
 
@@ -14,6 +17,9 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
@@ -82,6 +88,46 @@ public class PlayerData {
 		}
 	}
 	
+	/*
+	 *  Map of watched commands to the players that watch them. This speeds up checking 
+	 *  if any players watch a command that was run; instead of iterating over all
+	 *  players, we iterate over watched commands and get players accordingly.
+	 */
+	private static Multimap<String, PlayerData> spiedCommands = HashMultimap.create();
+	private static void watchCommand(String command, PlayerData player) {
+		spiedCommands.put(command, player);
+	}
+	
+	private static boolean unwatchCommand(String command, PlayerData player) {
+		return spiedCommands.remove(command, player);
+	}
+	
+	public static boolean isWatched(String command) {
+		return spiedCommands.containsKey(command);
+	}
+	
+	public static Collection<PlayerData> getWatchingPlayers(String command) {
+		return spiedCommands.get(command);
+	}
+	
+	
+	private static Multimap<String, PlayerData> spiedPlayers = HashMultimap.create();
+	private static void watchPlayer(String username, PlayerData player) {
+		spiedPlayers.put(username, player);
+	}
+	
+	private static boolean unwatchPlayer(String username, PlayerData player) {
+		return spiedPlayers.remove(username, player);
+	}
+	
+	public static boolean isWatchedPlayer(String username) {
+		return spiedPlayers.containsKey(username);
+	}
+	
+	public static Collection<PlayerData> getPlayersWatchingPlayer(String username) {
+		return spiedPlayers.get(username);
+	}
+	
 	private static WbsExtras plugin;
 	private static Logger logger;
 	private static ExtrasSettings settings;
@@ -128,8 +174,59 @@ public class PlayerData {
 	public String getName() {
 		return username;
 	}
+	
 	/************************************************/
-	/*					ITEM HISTORY				*/
+	/*                  COMMAND SPY                 */
+	/************************************************/
+	
+	// The commands to watch for this player
+	private Set<String> spyCommands = new HashSet<>();
+	
+	public boolean addSpyCommand(String newCommand) {
+		if (spyCommands.add(newCommand)) {
+			watchCommand(newCommand, this);
+			return true;
+		}
+		return false;
+	}
+	
+	public boolean removeSpyCommand(String existingCommand) {
+		if (spyCommands.remove(existingCommand)) {
+			unwatchCommand(existingCommand, this);
+			return true;
+		}
+		return false;
+	}
+	
+	public Set<String> getSpyCommands() {
+		return spyCommands;
+	}
+	
+	// The usernames of players that this player is watching
+	private Set<String> spyUsernames = new HashSet<>();
+
+	public boolean addSpyPlayer(String player) {
+		if (spyUsernames.add(player)) {
+			watchPlayer(player, this);
+			return true;
+		}
+		return false;
+	}
+	
+	public boolean removeSpyPlayer(String player) {
+		if (spyUsernames.remove(player)) {
+			unwatchPlayer(player, this);
+			return true;
+		}
+		return false;
+	}
+	
+	public Set<String> getSpyPlayers() {
+		return spyUsernames;
+	}
+	
+	/************************************************/
+	/*                  ITEM HISTORY                */
 	/************************************************/
 
 	private List<BaseComponent[]> itemHistory = null;
@@ -242,5 +339,4 @@ public class PlayerData {
 			lastCommands.remove(0);
 		}
 	}
-	
 }

@@ -8,7 +8,7 @@ grave-highlighting:
   enabled: false
   colour: 'b'
   
-
+# This option replaces [c] and [coords] with <x, y, z> in chat automatically.
 chat-coords:
   enabled: false
   permission: 'wbsextras.chat.coords'

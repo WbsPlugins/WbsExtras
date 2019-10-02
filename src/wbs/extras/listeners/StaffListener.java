@@ -30,6 +30,62 @@ public class StaffListener extends WbsMessenger implements Listener {
 		super(plugin);
 		settings = plugin.settings;
 	}
+
+	/************************************************/
+	/*                  COMMAND SPY                 */
+	/************************************************/
+	
+	private final String commandSpyPrefix = "&f[&6CS&f]";
+	
+	@EventHandler
+	public void commandSpy(PlayerCommandPreprocessEvent event) {
+		if (!settings.doCommandSpy()) {
+			return;
+		}
+		
+		Player player = event.getPlayer();
+		String username = player.getName();
+		if (player.hasPermission("wbsextras.staff.commandspy.exempt")) {
+			return;
+		}
+
+		String fullCommand = event.getMessage();
+		String command = fullCommand.split(" ")[0].substring(1);
+		
+		for (String blacklisted : settings.getCommandSpyBlacklist()) {
+			if (command.equalsIgnoreCase(blacklisted)) {
+				return;
+			}
+		}
+		
+		if (PlayerData.isWatched(command)) {
+			for (PlayerData data : PlayerData.getWatchingPlayers(command)) {
+				String watcherUsername = data.getName();
+				if (watcherUsername.equals(username)) {
+					continue;
+				}
+				Player watcher = Bukkit.getPlayer(watcherUsername);
+				if (watcher != null) { // If watcher is online
+					sendMessageNoPrefix(commandSpyPrefix + " " + player.getDisplayName() + "&f: &b" + fullCommand, watcher);
+				}
+			}
+		} else if (PlayerData.isWatchedPlayer(player.getName())) {
+			for (PlayerData data : PlayerData.getPlayersWatchingPlayer(username)) {
+				String watcherUsername = data.getName();
+				if (watcherUsername.equals(username)) {
+					continue;
+				}
+				Player watcher = Bukkit.getPlayer(watcherUsername);
+				if (watcher != null) { // If watcher is online
+					sendMessageNoPrefix(commandSpyPrefix + " " + player.getDisplayName() + "&f: &b" + fullCommand, watcher);
+				}
+			}
+		}
+	}
+
+	/************************************************/
+	/*                  ITEM HISTORY                */
+	/************************************************/
 	
 	private final String PICKUP_STRING = "Picked up";
 	@EventHandler
@@ -62,6 +118,10 @@ public class StaffListener extends WbsMessenger implements Listener {
 		data.addItemInteraction(item, DROP_STRING);
 	}
 	
+	/************************************************/
+	/*                  STAFF CHAT                  */
+	/************************************************/
+	
 	@EventHandler(priority=EventPriority.NORMAL)
 	public void staffChat(AsyncPlayerChatEvent event) {
 		if (!settings.doStaffChat()) {
@@ -93,6 +153,10 @@ public class StaffListener extends WbsMessenger implements Listener {
 	private String getStaffChatFormat(Player player) {
 		return settings.getStaffChatPrefix() + player.getDisplayName() + settings.getStaffChatSuffix();
 	}
+	
+	/************************************************/
+	/*                  LASTCOMMAND                 */
+	/************************************************/
 	
 	@EventHandler
 	public void onCommand(PlayerCommandPreprocessEvent event) {

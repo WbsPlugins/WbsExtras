@@ -315,13 +315,13 @@ public class ExtrasSettings extends WbsSettings {
 
         ConfigurationSection commandSpy = staff.getConfigurationSection("command-spy");
         if (commandSpy != null && commandSpy.getBoolean("enabled")) {
-        	doItemHistory = true;
-        	commandSpyBlacklist = lastCommand.getStringList("blacklist");
+        	doCommandSpy = true;
+        	commandSpyBlacklist = commandSpy.getStringList("blacklist");
         }
         
 	}
 	
-
+	// Command spy
 	private boolean doCommandSpy = false;
 	public boolean doCommandSpy() {
 		return doCommandSpy;
@@ -331,6 +331,7 @@ public class ExtrasSettings extends WbsSettings {
 		return commandSpyBlacklist;
 	}
 	
+	// Item history
 	private boolean doItemHistory = false;
 	public boolean doItemHistory() {
 		return doItemHistory;
@@ -341,6 +342,7 @@ public class ExtrasSettings extends WbsSettings {
 		return itemHistoryBuffer;
 	}
 	
+	// Last command
 	private boolean logLastCommand = false;
 	public boolean logLastCommand() {
 		return logLastCommand;
@@ -356,7 +358,7 @@ public class ExtrasSettings extends WbsSettings {
 		return lastCommandBlacklist;
 	}
 	
-	
+	// Staff chat
 	private boolean doStaffChat = false;
 	public boolean doStaffChat() {
 		return doStaffChat;

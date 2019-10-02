@@ -1,3 +1,7 @@
+
+# Spy on commands in a highly customizable way; this won't show you all commands,
+# only ones you choose (so your chat doesn't get spammed to no end).
+# Players with wbsextras.staff.commandspy.exempt cannot be spied on.
 command-spy:
   enabled: false # When disabled, the command isn't usable even by those with the permission
   # Commands in the blacklist can't be spyed on, unless

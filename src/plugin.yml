@@ -8,6 +8,9 @@ commands:
   lastcommand:
     description: View the last commands run by a specific user
     permission: wbsextras.staff.lastcommand
+  commandspy:
+    description: Spy on specific commands or players without spamming chat
+    permission: wbsextras.staff.commandspy
   itemhistory:
     description: View the last item pick ups/drops run by a specific user
     permission: wbsextras.staff.itemhistory

@@ -7,6 +7,7 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import net.milkbowl.vault.economy.Economy;
+import wbs.extras.commands.CommandSpyCommand;
 import wbs.extras.commands.ItemHistoryCommand;
 import wbs.extras.commands.LastCommandCommand;
 import wbs.extras.configurations.BarAnnouncement;
@@ -61,6 +62,9 @@ public class WbsExtras extends WbsPlugin {
 
 		getCommand("itemhistory").setExecutor(new ItemHistoryCommand(this));
 		getCommand("itemhistory").setTabCompleter(new ItemHistoryCommand(this));
+
+		getCommand("commandspy").setExecutor(new CommandSpyCommand(this));
+		getCommand("commandspy").setTabCompleter(new CommandSpyCommand(this));
 		
 		PluginManager pm = Bukkit.getServer().getPluginManager();
 		pm.registerEvents(new ChatListener(this), this);
