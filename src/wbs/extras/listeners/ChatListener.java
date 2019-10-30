@@ -18,6 +18,7 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 import wbs.extras.ExtrasSettings;
 import wbs.extras.WbsExtras;
 import wbs.extras.configurations.Replacement;
+import wbs.extras.player.PlayerData;
 import wbs.extras.util.WbsMessenger;
 import wbs.extras.util.WbsPlugin;
 
@@ -83,57 +84,57 @@ public class ChatListener extends WbsMessenger implements Listener {
 		String message = event.getMessage();
 		Set<Player> recipients = event.getRecipients();
 		Set<Player> removeRecipients = new HashSet<>();
-		String name;
+		
+		Player player = event.getPlayer();
+
 		String format = event.getFormat();
-		for (Player p : event.getRecipients()) {
-			if (p.equals(event.getPlayer())) {
+		for (Player receiver : event.getRecipients()) {
+			if (receiver.equals(player)) {
 				continue;
 			}
-			name = p.getName();
-		//	NotificationSettings settings = ASMain.getPlayerSettings(name);
-		//	if (settings == null) {
-		//		settings = ASMain.initializeSettings(name);
-		//	}
-
 			
-			if (true) { // (ASMain.getPlayerSettings(name) != null) {
-
-			//	if (settings.enabled == false) {
-			//		continue;
-			//	}
-				
-				String formatted = String.format(format, event.getPlayer().getDisplayName(), message);
-				String finalMessage = formatted;
-				boolean changed = false;
-				String check = p.getName();
-			//	if (settings.needsTag) {
-			//		check = "@" + check;
-			//	}
-				String oldMessage = finalMessage;
-				if (message.toUpperCase().contains(check.toUpperCase())) {
-			//		if (!settings.needsTag || message.indexOf("@") != 0) {
-						if (message.toUpperCase().contains(check.toUpperCase())) {
-							finalMessage = highlightAll(check, finalMessage, 'b');
-							changed = (changed || !finalMessage.equals(oldMessage));
-							oldMessage = finalMessage;
-						}
-			//		}
+			PlayerData data = null;
+			if (PlayerData.exists(receiver)) {
+				data = PlayerData.getPlayerData(receiver);
+			}
+		
+			if (data != null && !data.doChatNotifications) {
+				continue;
+			}
+			
+			String formatted = String.format(format, player.getDisplayName(), message);
+			String finalMessage = formatted;
+			boolean changed = false;
+			String check = receiver.getName();
+			if (data != null && data.needsTag) {
+				check = "@" + check;
+			}
+			String oldMessage = finalMessage;
+			if (message.toUpperCase().contains(check.toUpperCase())) {
+				if ((data == null || !data.needsTag) || message.indexOf("@") != 0) {
+					if (message.toUpperCase().contains(check.toUpperCase())) {
+						finalMessage = highlightAll(check, finalMessage, 'b');
+						changed = (changed || !finalMessage.equals(oldMessage));
+						oldMessage = finalMessage;
+					}
 				}
+			}
 
-			//	List<String> triggers = settings.triggers;
-			//	for (String trigger : triggers) {
-			//		if (message.toUpperCase().contains(trigger.toUpperCase())) {
-			//			finalMessage = highlightAll(trigger, finalMessage, 'e');
-			//			changed = (changed || !finalMessage.equals(oldMessage));
-			//			oldMessage = finalMessage;
-			//		}
-			//	}
-				
-				if (changed) {
-					removeRecipients.add(p);
-					p.sendMessage(finalMessage);
-					p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 1, 1);
+			if (data != null) {
+				List<String> triggers = data.getTriggers();
+				for (String trigger : triggers) {
+					if (message.toUpperCase().contains(trigger.toUpperCase())) {
+						finalMessage = highlightAll(trigger, finalMessage, 'e');
+						changed = (changed || !finalMessage.equals(oldMessage));
+						oldMessage = finalMessage;
+					}
 				}
+			}
+			
+			if (changed) {
+				removeRecipients.add(receiver);
+				receiver.sendMessage(finalMessage);
+				receiver.playSound(receiver.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 1, 1);
 			}
 		
 		}

@@ -10,6 +10,7 @@ import net.milkbowl.vault.economy.Economy;
 import wbs.extras.commands.CommandSpyCommand;
 import wbs.extras.commands.ItemHistoryCommand;
 import wbs.extras.commands.LastCommandCommand;
+import wbs.extras.commands.NotificationsCommand;
 import wbs.extras.configurations.BarAnnouncement;
 import wbs.extras.listeners.ChatListener;
 import wbs.extras.listeners.MiscListener;
@@ -48,7 +49,7 @@ public class WbsExtras extends WbsPlugin {
 		PlayerData.setPlugin(this);
 		PlayerData.loadAll();
 		
-		startBackupTimers();
+	//	startBackupTimers();
 		
 		if (!setupEconomy()) {
 			logger.severe("No Vault dependency found! Monetary commands disabled.");
@@ -65,6 +66,9 @@ public class WbsExtras extends WbsPlugin {
 
 		getCommand("commandspy").setExecutor(new CommandSpyCommand(this));
 		getCommand("commandspy").setTabCompleter(new CommandSpyCommand(this));
+		
+		getCommand("notifications").setExecutor(new NotificationsCommand(this));
+		getCommand("notifications").setTabCompleter(new NotificationsCommand(this));
 		
 		PluginManager pm = Bukkit.getServer().getPluginManager();
 		pm.registerEvents(new ChatListener(this), this);

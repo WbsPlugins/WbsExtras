@@ -5,6 +5,10 @@ api-version: 1.13
 author: Weber588
 description: A variety of configurable options for various servers 
 commands:
+  notifications:
+    description: Configure chat based notifications
+    permission: wbsextras.notif
+    aliases: [notif, notification]
   lastcommand:
     description: View the last commands run by a specific user
     permission: wbsextras.staff.lastcommand

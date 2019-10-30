@@ -158,6 +158,14 @@ public class PlayerData {
 
 		username = config.getString("username");
 		lastCommands = config.getStringList("lastCommands");
+		spyCommands = new HashSet<>();
+		spyCommands.addAll(config.getStringList("spyCommands"));
+		spyUsernames = new HashSet<>();
+		spyUsernames.addAll(config.getStringList("spyUsernames"));
+		
+		triggers = config.getStringList("triggers");
+		doChatNotifications = config.getBoolean("doChatNotifications");
+		needsTag = config.getBoolean("needsTag");
 		
 		allData.put(username, this);
 	}
@@ -167,12 +175,62 @@ public class PlayerData {
 
 		config.set("username", username);
 		config.set("lastCommands", lastCommands);
+		config.set("spyCommands", spyCommands);
+		config.set("triggers", triggers);
+		config.set("doChatNotifications", doChatNotifications);
+		config.set("needsTag", needsTag);
 		
 		return config;
 	}
 	
 	public String getName() {
 		return username;
+	}
+	
+	/************************************************/
+	/*                 Chat Notifier                */
+	/************************************************/
+
+	public boolean doChatNotifications = true;
+	
+	public boolean needsTag = false;
+	
+	private List<String> triggers = new LinkedList<>();
+	
+	public List<String> getTriggers() {
+		return triggers;
+	}
+	
+	public boolean addTrigger(String trigger) {
+		for (String existing : triggers) {
+			if (trigger.equalsIgnoreCase(existing)) {
+				return false;
+			}
+		}
+		
+		triggers.add(trigger);
+		return true;
+	}
+
+	public boolean removeTrigger(String trigger) {
+		for (String existing : triggers) {
+			if (trigger.equalsIgnoreCase(existing)) {
+				triggers.remove(existing);
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	public boolean hasTrigger(String trigger) {
+		for (String existing : triggers) {
+			if (trigger.equalsIgnoreCase(existing)) {
+				return true;
+			}
+		}
+		
+		return false;
 	}
 	
 	/************************************************/

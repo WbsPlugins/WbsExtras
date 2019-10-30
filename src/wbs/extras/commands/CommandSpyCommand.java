@@ -58,14 +58,17 @@ public class CommandSpyCommand extends WbsMessenger implements CommandExecutor, 
 			return true;
 		}
 		
-		String option = "";
+		boolean playerSpy = false; // true to spy on players, false to spy on commands
+		
 		if (length >= 1) {
 			switch (args[0].toLowerCase()) {
 			case "player":
 			case "players":
+				playerSpy = true;
 				break;
 			case "command":
 			case "commands":
+				playerSpy = false;
 				break;
 			default:
 				sendMessage(usage, sender);
@@ -78,13 +81,13 @@ public class CommandSpyCommand extends WbsMessenger implements CommandExecutor, 
 			switch (args[1].toLowerCase()) {
 			case "add":
 				if (length == 2) {
-					sendMessage("Usage: &h/commandspy " + args[0] + " " + args[1] + " <player/command to spy on>", sender);
+					sendMessage("Usage: &h/commandspy " + args[0] + " " + args[1] + " " + (playerSpy ? "<player>" : "<command to spy on>"), sender);
 					return true;
 				}
 				break;
 			case "remove":
 				if (length == 2) {
-					sendMessage("Usage: &h/commandspy " + args[0] + " " + args[1] + " <player/command to remove>", sender);
+					sendMessage("Usage: &h/commandspy " + args[0] + " " + args[1] + " " + (playerSpy ? "<player>" : "<command to remove>"), sender);
 					return true;
 				}
 				break;
@@ -174,6 +177,7 @@ public class CommandSpyCommand extends WbsMessenger implements CommandExecutor, 
 				int index = 1;
 				for (String watched : watchedPlayers) {
 					sendMessage(index + ") &h" + watched, player);
+					index++;
 				}
 			}
 			break;
@@ -186,7 +190,8 @@ public class CommandSpyCommand extends WbsMessenger implements CommandExecutor, 
 				sendMessage("Commands you're watching: ", player);
 				int index = 1;
 				for (String watched : watchedCommands) {
-					sendMessage(index + ") &h" + watched, player);
+					sendMessage(index + ") &h/" + watched, player);
+					index++;
 				}
 			}
 			break;
