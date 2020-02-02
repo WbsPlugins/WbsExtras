@@ -19,6 +19,7 @@ import org.bukkit.inventory.ItemStack;
 import wbs.extras.ExtrasSettings;
 import wbs.extras.WbsExtras;
 import wbs.extras.player.PlayerData;
+import wbs.extras.player.PlayerStore;
 import wbs.extras.util.WbsMessenger;
 import wbs.extras.util.WbsTime;
 
@@ -58,8 +59,9 @@ public class StaffListener extends WbsMessenger implements Listener {
 			}
 		}
 		
-		if (PlayerData.isWatched(command)) {
-			for (PlayerData data : PlayerData.getWatchingPlayers(command)) {
+		PlayerStore store = PlayerStore.getInstance();
+		if (store.isWatched(command)) {
+			for (PlayerData data : store.getWatchingPlayers(command)) {
 				String watcherUsername = data.getName();
 				if (watcherUsername.equals(username)) {
 					continue;
@@ -69,8 +71,8 @@ public class StaffListener extends WbsMessenger implements Listener {
 					sendMessageNoPrefix(commandSpyPrefix + " " + player.getDisplayName() + "&f: &b" + fullCommand, watcher);
 				}
 			}
-		} else if (PlayerData.isWatchedPlayer(player.getName())) {
-			for (PlayerData data : PlayerData.getPlayersWatchingPlayer(username)) {
+		} else if (store.isWatchedPlayer(player.getName())) {
+			for (PlayerData data : store.getPlayersWatchingPlayer(username)) {
 				String watcherUsername = data.getName();
 				if (watcherUsername.equalsIgnoreCase(username)) {
 					continue;
@@ -98,7 +100,7 @@ public class StaffListener extends WbsMessenger implements Listener {
 			Player player = (Player) entity;
 			ItemStack item = event.getItem().getItemStack();
 			
-			PlayerData data = PlayerData.getPlayerData(player);
+			PlayerData data = PlayerStore.getInstance().getPlayerData(player);
 			
 			data.addItemInteraction(item, PICKUP_STRING);
 		}
@@ -113,7 +115,7 @@ public class StaffListener extends WbsMessenger implements Listener {
 		Player player = event.getPlayer();
 		ItemStack item = event.getItemDrop().getItemStack();
 		
-		PlayerData data = PlayerData.getPlayerData(player);
+		PlayerData data = PlayerStore.getInstance().getPlayerData(player);
 		
 		data.addItemInteraction(item, DROP_STRING);
 	}
@@ -183,7 +185,7 @@ public class StaffListener extends WbsMessenger implements Listener {
 		}
 		
 		// Don't check, always needed
-		PlayerData data = PlayerData.getPlayerData(player);
+		PlayerData data = PlayerStore.getInstance().getPlayerData(player);
 		
 		LocalDateTime timeStamp = LocalDateTime.now();
 		

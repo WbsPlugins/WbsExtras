@@ -14,6 +14,7 @@ import org.bukkit.entity.Player;
 import wbs.extras.ExtrasSettings;
 import wbs.extras.WbsExtras;
 import wbs.extras.player.PlayerData;
+import wbs.extras.player.PlayerStore;
 import wbs.extras.util.WbsMessenger;
 
 public class LastCommandCommand extends WbsMessenger implements CommandExecutor, TabCompleter {
@@ -46,7 +47,9 @@ public class LastCommandCommand extends WbsMessenger implements CommandExecutor,
 		}
 		
 		String username = args[0];
-		if (!PlayerData.exists(username)) {
+		PlayerStore store = PlayerStore.getInstance();
+		
+		if (!store.exists(username)) {
 			sendMessage("No commands logged for that player.", sender);
 			return true;
 		}
@@ -61,7 +64,7 @@ public class LastCommandCommand extends WbsMessenger implements CommandExecutor,
 			}
 		}
 		
-		PlayerData data = PlayerData.getPlayerData(username);
+		PlayerData data = store.getPlayerData(username);
 		
 		List<String> toDisplay = data.getLastNCommands(amount);
 

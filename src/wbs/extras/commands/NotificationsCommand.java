@@ -14,6 +14,7 @@ import wbs.extras.ExtrasSettings;
 import wbs.extras.util.WbsMessenger;
 import wbs.extras.WbsExtras;
 import wbs.extras.player.PlayerData;
+import wbs.extras.player.PlayerStore;
 
 public class NotificationsCommand extends WbsMessenger implements CommandExecutor, TabCompleter {
 
@@ -51,7 +52,7 @@ public class NotificationsCommand extends WbsMessenger implements CommandExecuto
 		
 		Player player = (Player) sender;
 
-		PlayerData data = PlayerData.getPlayerData(player);
+		PlayerData data = PlayerStore.getInstance().getPlayerData(player);
 		
 		int index = 0;
 		List<String> notificationWords;

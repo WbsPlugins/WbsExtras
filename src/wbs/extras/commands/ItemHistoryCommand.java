@@ -17,6 +17,7 @@ import wbs.extras.util.WbsMessenger;
 import wbs.extras.ExtrasSettings;
 import wbs.extras.WbsExtras;
 import wbs.extras.player.PlayerData;
+import wbs.extras.player.PlayerStore;
 
 public class ItemHistoryCommand extends WbsMessenger implements CommandExecutor, TabCompleter {
 
@@ -48,8 +49,10 @@ public class ItemHistoryCommand extends WbsMessenger implements CommandExecutor,
 			return true;
 		}
 		
+		PlayerStore store = PlayerStore.getInstance();
+		
 		String username = args[0];
-		if (!PlayerData.exists(username)) {
+		if (!store.exists(username)) {
 			sendMessage("No item drops/pickups logged for that player.", sender);
 			return true;
 		}
@@ -64,7 +67,7 @@ public class ItemHistoryCommand extends WbsMessenger implements CommandExecutor,
 			}
 		}
 		
-		PlayerData data = PlayerData.getPlayerData(username);
+		PlayerData data = store.getPlayerData(username);
 		
 		sendMessage(ChatColor.GOLD + "Last " + amount + " item pickups/drops for " + data.getName() + ":", sender);
 		for (BaseComponent[] component : data.getLastNItemInteractions(amount)) {

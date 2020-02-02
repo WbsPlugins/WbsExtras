@@ -1,192 +1,66 @@
 package wbs.extras.player;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
 import java.util.logging.Logger;
 
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
-
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.HoverEvent.Action;
 import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.chat.HoverEvent.Action;
 import wbs.extras.ExtrasSettings;
 import wbs.extras.WbsExtras;
 import wbs.extras.util.RomanNumerals;
 import wbs.extras.util.WbsStrings;
 import wbs.extras.util.WbsTime;
 
-public class PlayerData {
+public class PlayerData implements Serializable {
 
-	private static Map<String, PlayerData> allData = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-	
-	public static Map<String, PlayerData> allData() {
-		return allData;
-	}
+	private static final long serialVersionUID = -1825325812023504431L;
 
-	public static boolean exists(Player player) {
-		return exists(player.getName());
-	}
-	public static boolean exists(String username) {
-		return allData.containsKey(username);
-	}
-
-	public static PlayerData getPlayerData(Player player) {
-		String username = player.getName();
-		return getPlayerData(username);
-	}
-	
-	public static PlayerData getPlayerData(String username) {
-		if (exists(username)) {
-			return allData.get(username);
-		}
-		
-		return new PlayerData(username);
-	}
-	
-	public static void saveAll() {
-		for (PlayerData data : allData.values()) {
-			String username = data.getName();
-			File playerFile = new File(plugin.getDataFolder(), "player_data" + File.separator + username + ".yml");
-			
-			try {
-				data.toConfig().save(playerFile);
-			} catch (IOException e) {
-				logger.warning("Player " + username + " was not able to save.");
-			}
-		}
-	}
-	
-	public static void loadAll() {
-		File playerDir = new File(plugin.getDataFolder() + File.separator + "player_data");
-		if (!playerDir.exists()) {
-			logger.warning("Player directory didn't exist. Creating...");
-			
-			playerDir.mkdir();
-		}
-		for (File file : playerDir.listFiles()) {
-			if (file.getName().endsWith(".yml")) {
-				new PlayerData(file);
-			}
-		}
-	}
-	
-	/*
-	 *  Map of watched commands to the players that watch them. This speeds up checking 
-	 *  if any players watch a command that was run; instead of iterating over all
-	 *  players, we iterate over watched commands and get players accordingly.
-	 */
-	private static Multimap<String, PlayerData> spiedCommands = HashMultimap.create();
-	private static void watchCommand(String command, PlayerData player) {
-		spiedCommands.put(command, player);
-	}
-	
-	private static boolean unwatchCommand(String command, PlayerData player) {
-		return spiedCommands.remove(command, player);
-	}
-	
-	public static boolean isWatched(String command) {
-		return spiedCommands.containsKey(command);
-	}
-	
-	public static Collection<PlayerData> getWatchingPlayers(String command) {
-		return spiedCommands.get(command);
-	}
-	
-	
-	private static Multimap<String, PlayerData> spiedPlayers = HashMultimap.create();
-	private static void watchPlayer(String username, PlayerData player) {
-		spiedPlayers.put(username, player);
-	}
-	
-	private static boolean unwatchPlayer(String username, PlayerData player) {
-		return spiedPlayers.remove(username, player);
-	}
-	
-	public static boolean isWatchedPlayer(String username) {
-		return spiedPlayers.containsKey(username);
-	}
-	
-	public static Collection<PlayerData> getPlayersWatchingPlayer(String username) {
-		return spiedPlayers.get(username);
-	}
-	
 	private static WbsExtras plugin;
 	private static Logger logger;
 	private static ExtrasSettings settings;
+	
+	private static PlayerStore store;
+	
 	public static void setPlugin(WbsExtras plugin) {
-		PlayerData.plugin = plugin;
+		PlayerData.plugin = plugin; 
 		logger = plugin.getLogger();
 		settings = plugin.settings;
+		
+		store = PlayerStore.getInstance();
 	}
-	
+
 	/************************************************/
 	/*					END OF STATIC				*/
 	/************************************************/
+
+	PlayerData(Player player) {
+		username = player.getName();
+		if (!store.addPlayer(this)) {
+			logger.warning("A SerializablePlayer object was instantiated when the data already existed.");
+		}
+	}
+	
+	PlayerData(String username) {
+		this.username = username;
+		if (!store.addPlayer(this)) {
+			logger.warning("A SerializablePlayer object was instantiated when the data already existed.");
+		}
+	}
 	
 	private String username;
-
-	private PlayerData(Player player) {
-		username = player.getName();
-		allData.put(username, this);
-	}
-	
-	private PlayerData(String username) {
-		this.username = username;
-		allData.put(username, this);
-	}
-	
-	public PlayerData(File dataFile) {
-		YamlConfiguration config = YamlConfiguration.loadConfiguration(dataFile);
-
-		username = config.getString("username");
-		lastCommands = config.getStringList("lastCommands");
-		spyCommands = config.getStringList("spyCommands");
-		spyUsernames = config.getStringList("spyUsernames");
-		for (String watchedCommand : spyCommands) {
-			watchCommand(watchedCommand, this);
-		}
-		for (String watchedPlayer : spyUsernames) {
-			watchCommand(watchedPlayer, this);
-		}
-		
-		triggers = config.getStringList("triggers");
-		doChatNotifications = config.getBoolean("doChatNotifications");
-		needsTag = config.getBoolean("needsTag");
-		
-		allData.put(username, this);
-	}
-	
-	public YamlConfiguration toConfig() {
-		YamlConfiguration config = new YamlConfiguration();
-
-		config.set("username", username);
-		config.set("lastCommands", lastCommands);
-		config.set("spyCommands", spyCommands);
-		
-		config.set("triggers", triggers);
-		config.set("doChatNotifications", doChatNotifications);
-		config.set("needsTag", needsTag);
-		
-		return config;
-	}
 	
 	public String getName() {
 		return username;
@@ -200,7 +74,7 @@ public class PlayerData {
 	
 	public boolean needsTag = false;
 	
-	private List<String> triggers = new LinkedList<>();
+	List<String> triggers = new LinkedList<>();
 	
 	public List<String> getTriggers() {
 		return triggers;
@@ -243,7 +117,7 @@ public class PlayerData {
 	/************************************************/
 	
 	// The commands to watch for this player
-	private List<String> spyCommands = new LinkedList<>();
+	List<String> spyCommands = new LinkedList<>();
 	
 	public boolean addSpyCommand(String newCommand) {
 		for (String existing : spyCommands) {
@@ -252,7 +126,7 @@ public class PlayerData {
 			}
 		}
 
-		watchCommand(newCommand, this);
+		store.watchCommand(newCommand, this);
 		spyCommands.add(newCommand);
 		return true;
 	}
@@ -260,7 +134,7 @@ public class PlayerData {
 	public boolean removeSpyCommand(String existingCommand) {
 		for (String existing : spyCommands) {
 			if (existingCommand.equalsIgnoreCase(existing)) {
-				unwatchCommand(existingCommand, this);
+				store.unwatchCommand(existingCommand, this);
 				spyCommands.remove(existing);
 				return true;
 			}
@@ -274,7 +148,7 @@ public class PlayerData {
 	}
 	
 	// The usernames of players that this player is watching
-	private List<String> spyUsernames = new LinkedList<>();
+	List<String> spyUsernames = new LinkedList<>();
 
 	public boolean addSpyPlayer(String player) {
 		for (String existing : spyUsernames) {
@@ -284,7 +158,7 @@ public class PlayerData {
 		}
 		
 		spyUsernames.add(player);
-		watchPlayer(player, this);
+		store.watchPlayer(player, this);
 		return true;
 	}
 	
@@ -292,7 +166,7 @@ public class PlayerData {
 		for (String existing : spyUsernames) {
 			if (player.equalsIgnoreCase(existing)) {
 				spyUsernames.remove(existing);
-				unwatchPlayer(player, this);
+				store.unwatchPlayer(player, this);
 				return true;
 			}
 		}
@@ -308,7 +182,7 @@ public class PlayerData {
 	/*                  ITEM HISTORY                */
 	/************************************************/
 
-	private List<BaseComponent[]> itemHistory = null;
+	private transient List<BaseComponent[]> itemHistory = null;
 
 	public List<BaseComponent[]> getLastNItemInteractions(int n) {
 		List<BaseComponent[]> returnList = new LinkedList<>();
@@ -391,7 +265,7 @@ public class PlayerData {
 	/************************************************/
 	
 	
-	private List<String> lastCommands = null;
+	List<String> lastCommands = null;
 	
 	public List<String> getLastNCommands(int n) {
 		List<String> returnList = new LinkedList<>();

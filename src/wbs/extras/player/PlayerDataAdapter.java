@@ -47,7 +47,7 @@ public class PlayerDataAdapter {
 		}
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(dataFile);
 
-		SerializablePlayer data = new SerializablePlayer(config.getString("username"));
+		PlayerData data = new PlayerData(config.getString("username"));
 		
 		data.lastCommands = config.getStringList("lastCommands");
 		data.spyCommands = config.getStringList("spyCommands");
@@ -64,5 +64,28 @@ public class PlayerDataAdapter {
 		data.triggers = config.getStringList("triggers");
 		data.doChatNotifications = config.getBoolean("doChatNotifications");
 		data.needsTag = config.getBoolean("needsTag");
+	}
+
+	public static int removeLegacyFolder() {
+		WbsExtras plugin = WbsExtras.getInstance();
+		File playerDir = new File(plugin.getDataFolder() + File.separator + "player_data");
+		int count = 0;
+		if (playerDir.exists()) {
+			for (File file : playerDir.listFiles()) {
+				if (file.getName().endsWith(".yml")) {
+					if (file.delete()) {
+						count++;
+					} else {
+						plugin.logger.info("A legacy player file failed to remove correctly.");
+					}
+				}
+			}
+			
+			playerDir.delete();
+		} else {
+			return 0;
+		}
+		
+		return count;
 	}
 }

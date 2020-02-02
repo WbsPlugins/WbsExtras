@@ -24,6 +24,7 @@ import wbs.extras.ExtrasSettings;
 import wbs.extras.WbsExtras;
 import wbs.extras.configurations.Replacement;
 import wbs.extras.player.PlayerData;
+import wbs.extras.player.PlayerStore;
 import wbs.extras.util.WbsMessenger;
 import wbs.extras.util.WbsPlugin;
 
@@ -112,7 +113,6 @@ public class ChatListener extends WbsMessenger implements Listener {
 	
 	@EventHandler(priority=EventPriority.HIGH, ignoreCancelled=true)
 	public void onNameMention(AsyncPlayerChatEvent event) {
-		
 		if (!settings.doChatNotifiers()) {
 			return;
 		}
@@ -124,14 +124,15 @@ public class ChatListener extends WbsMessenger implements Listener {
 		Player player = event.getPlayer();
 
 		String format = event.getFormat();
+		PlayerStore store = PlayerStore.getInstance();
 		for (Player receiver : event.getRecipients()) {
 			if (receiver.equals(player)) {
 				continue;
 			}
 			
 			PlayerData data = null;
-			if (PlayerData.exists(receiver)) {
-				data = PlayerData.getPlayerData(receiver);
+			if (store.exists(receiver)) {
+				data = store.getPlayerData(receiver);
 			}
 		
 			if (data != null && !data.doChatNotifications) {

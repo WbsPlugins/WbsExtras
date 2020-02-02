@@ -1,5 +1,7 @@
 package wbs.extras;
 
+import java.io.File;
+import java.io.IOException;
 import java.time.LocalDate;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.PluginManager;
@@ -15,7 +17,9 @@ import wbs.extras.configurations.BarAnnouncement;
 import wbs.extras.listeners.ChatListener;
 import wbs.extras.listeners.MiscListener;
 import wbs.extras.listeners.StaffListener;
+import wbs.extras.player.PlayerStore;
 import wbs.extras.player.PlayerData;
+import wbs.extras.player.PlayerDataAdapter;
 import wbs.extras.util.WbsPlugin;
 
 public class WbsExtras extends WbsPlugin {
@@ -51,8 +55,33 @@ public class WbsExtras extends WbsPlugin {
 		
 		settings = new ExtrasSettings(this);
 
+		PlayerStore.setPlugin(this);
 		PlayerData.setPlugin(this);
-		PlayerData.loadAll();
+		
+		PlayerStore.getInstance().loadAll();
+
+		final File data = new File(getDataFolder() + File.separator + "player.data");
+		
+		if (!data.exists()) {
+			try {
+				data.createNewFile();
+			} catch (IOException e) {
+				logger.severe("An unknown error occured when creating the player data file.");
+				Bukkit.getPluginManager().disablePlugin(this);
+			}
+		}
+		
+		int legacyLoaded = PlayerDataAdapter.loadOldPlayers();
+		
+		logger.info("Loaded " + legacyLoaded + " legacy players from configs.");
+		
+		if (legacyLoaded > 0) {
+			PlayerStore.getInstance().saveAll();
+
+			int legacyDeleted = PlayerDataAdapter.removeLegacyFolder();
+			logger.info("Successfully deleted " + legacyDeleted + " legacy player files.");
+		}
+		
 		
 	//	startBackupTimers();
 		
@@ -87,7 +116,7 @@ public class WbsExtras extends WbsPlugin {
 			@Override
 			public void run() {
 				if (!lastLoop.equals(LocalDate.now())) { // Don't repeat same day
-					PlayerData.saveAll();
+					PlayerStore.getInstance().saveAll();
 				}
 				lastLoop = LocalDate.now();
 			}
@@ -116,7 +145,7 @@ public class WbsExtras extends WbsPlugin {
 	
 	@Override
 	public void onDisable() {
-		PlayerData.saveAll();
+		PlayerStore.getInstance().saveAll();
 		BarAnnouncement.stop();
 	}
 }

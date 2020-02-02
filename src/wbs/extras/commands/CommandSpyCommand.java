@@ -20,6 +20,7 @@ import org.bukkit.entity.Player;
 import wbs.extras.ExtrasSettings;
 import wbs.extras.WbsExtras;
 import wbs.extras.player.PlayerData;
+import wbs.extras.player.PlayerStore;
 import wbs.extras.util.WbsMessenger;
 import wbs.extras.util.WbsPlugin;
 
@@ -118,7 +119,7 @@ public class CommandSpyCommand extends WbsMessenger implements CommandExecutor, 
 	}
 
 	private void removeCommand(String[] args, Player player) {
-		PlayerData data = PlayerData.getPlayerData(player);
+		PlayerData data = PlayerStore.getInstance().getPlayerData(player);
 
 		switch (args[0].toLowerCase()) {
 		case "player":
@@ -141,7 +142,7 @@ public class CommandSpyCommand extends WbsMessenger implements CommandExecutor, 
 	}
 	
 	private void addCommand(String[] args, Player player) {
-		PlayerData data = PlayerData.getPlayerData(player);
+		PlayerData data = PlayerStore.getInstance().getPlayerData(player);
 
 		switch (args[0].toLowerCase()) {
 		case "player":
@@ -164,7 +165,7 @@ public class CommandSpyCommand extends WbsMessenger implements CommandExecutor, 
 	}
 	
 	private void showList(String[] args, Player player) {
-		PlayerData data = PlayerData.getPlayerData(player);
+		PlayerData data = PlayerStore.getInstance().getPlayerData(player);
 
 		switch (args[0].toLowerCase()) {
 		case "player":
@@ -218,7 +219,7 @@ public class CommandSpyCommand extends WbsMessenger implements CommandExecutor, 
 			}
 			
 			if (length == 3) {
-				PlayerData data = PlayerData.getPlayerData(sender.getName());
+				PlayerData data = PlayerStore.getInstance().getPlayerData(sender.getName());
 				
 				String arg1 = args[1].toLowerCase();
 				

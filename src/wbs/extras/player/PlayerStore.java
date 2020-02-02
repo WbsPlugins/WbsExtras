@@ -42,10 +42,14 @@ public class PlayerStore {
 	/************************************************/
 	/*					END OF STATIC				*/
 	/************************************************/
-
-	private Map<String, SerializablePlayer> allData = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 	
-	public Map<String, SerializablePlayer> allData() {
+	private PlayerStore() {
+		
+	}
+
+	private Map<String, PlayerData> allData = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+	
+	public Map<String, PlayerData> allData() {
 		return allData;
 	}
 	
@@ -55,7 +59,7 @@ public class PlayerStore {
 	 * @return True if the data was added. If the player already
 	 * exists, returns false.
 	 */
-	boolean addPlayer(SerializablePlayer data) {
+	boolean addPlayer(PlayerData data) {
 		if (allData.containsKey(data.getName())) {
 			return false;
 		}
@@ -71,17 +75,17 @@ public class PlayerStore {
 		return allData.containsKey(username);
 	}
 
-	public SerializablePlayer getPlayerData(Player player) {
+	public PlayerData getPlayerData(Player player) {
 		String username = player.getName();
 		return getPlayerData(username);
 	}
 	
-	public SerializablePlayer getPlayerData(String username) {
+	public PlayerData getPlayerData(String username) {
 		if (exists(username)) {
 			return allData.get(username);
 		}
 		
-		return new SerializablePlayer(username);
+		return new PlayerData(username);
 	}
 	
 	public void saveAll() {
@@ -105,14 +109,22 @@ public class PlayerStore {
 	
 	@SuppressWarnings("unchecked")
 	public void loadAll() {
-		final String path = plugin.getDataFolder() + File.separator +"player.data";
+		final String path = plugin.getDataFolder() + File.separator + "player.data";
 		logger = plugin.getLogger();
 
 		logger.info("Attempting to load Player data... ");
 		
+		File dataFile = new File(path);
+		
+		if (!dataFile.exists()) {
+			logger.info("No existing data found; one will be created.");
+			saveAll();
+			return;
+		}
+		
 		try (ObjectInputStream input = new ObjectInputStream(new FileInputStream(path))) {
 			try {
-				allData = (TreeMap<String, SerializablePlayer>) input.readObject();
+				allData = (TreeMap<String, PlayerData>) input.readObject();
 			} catch (ClassNotFoundException e) {
 				logger.severe("A class definition was missing when reading data!");
 				e.printStackTrace();
@@ -137,12 +149,12 @@ public class PlayerStore {
 	 *  if any players watch a command that was run; instead of iterating over all
 	 *  players, we iterate over watched commands and get players accordingly.
 	 */
-	private Multimap<String, SerializablePlayer> spiedCommands = HashMultimap.create();
-	public void watchCommand(String command, SerializablePlayer player) {
+	private Multimap<String, PlayerData> spiedCommands = HashMultimap.create();
+	public void watchCommand(String command, PlayerData player) {
 		spiedCommands.put(command, player);
 	}
 	
-	public boolean unwatchCommand(String command, SerializablePlayer player) {
+	public boolean unwatchCommand(String command, PlayerData player) {
 		return spiedCommands.remove(command, player);
 	}
 	
@@ -150,17 +162,17 @@ public class PlayerStore {
 		return spiedCommands.containsKey(command);
 	}
 	
-	public Collection<SerializablePlayer> getWatchingPlayers(String command) {
+	public Collection<PlayerData> getWatchingPlayers(String command) {
 		return spiedCommands.get(command);
 	}
 	
 	
-	private Multimap<String, SerializablePlayer> spiedPlayers = HashMultimap.create();
-	public void watchPlayer(String username, SerializablePlayer player) {
+	private Multimap<String, PlayerData> spiedPlayers = HashMultimap.create();
+	public void watchPlayer(String username, PlayerData player) {
 		spiedPlayers.put(username, player);
 	}
 	
-	public boolean unwatchPlayer(String username, SerializablePlayer player) {
+	public boolean unwatchPlayer(String username, PlayerData player) {
 		return spiedPlayers.remove(username, player);
 	}
 	
@@ -168,7 +180,7 @@ public class PlayerStore {
 		return spiedPlayers.containsKey(username);
 	}
 	
-	public Collection<SerializablePlayer> getPlayersWatchingPlayer(String username) {
+	public Collection<PlayerData> getPlayersWatchingPlayer(String username) {
 		return spiedPlayers.get(username);
 	}
 }
