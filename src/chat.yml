@@ -1,6 +1,15 @@
 # This config affects chat based extras.
 # By default, all extras are disabled!
 
+# This option lets you add tab completions to other plugins commands
+tab-completions:
+  server: # Add a new section for each command you want to add tabs to
+    override: true # Whether or not to replace existing tabs in the command
+    '1': # The arg number (1 = first, i.e. these will be added like /server creative etc)
+    - 'creative' # You can list tabs here or just add a single string
+    - 'survival'
+    - 'prison'
+    
 # When enabled, you give people with wbsextras.chat.grave the ability to put a `
 # on either side of a phrase in chat. Everything between those letters will be
 # the colour you choose here.

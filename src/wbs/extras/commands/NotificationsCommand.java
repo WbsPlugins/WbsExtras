@@ -23,8 +23,8 @@ public class NotificationsCommand extends WbsMessenger implements CommandExecuto
 		settings = plugin.settings;
 	}
 
-	private final String permission = "wbsextras.staff.lastcommand";
-	private final String usage = "Usage: &h/notifications <username> [amount]";
+	private final String permission = "wbsextras.notif";
+	private final String usage = "Usage: &h/notifications <add|list|settings>";
 	
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {

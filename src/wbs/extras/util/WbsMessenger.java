@@ -1,5 +1,6 @@
 package wbs.extras.util;
 
+import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -33,5 +34,9 @@ public class WbsMessenger {
 	
 	protected void sendActionBar(String message, Player player) {
 		plugin.sendActionBar(message, player);
+	}
+	
+	protected void broadcastActionBar(String message, double radius, Location loc) {
+		plugin.broadcastActionBar(message, radius, loc);
 	}
 }

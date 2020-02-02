@@ -1,20 +1,30 @@
 package wbs.extras;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BookMeta;
+import org.bukkit.inventory.meta.ItemMeta;
+
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 
 import wbs.extras.configurations.BarAnnouncement;
 import wbs.extras.configurations.Replacement;
+import wbs.extras.util.WbsEnums;
 import wbs.extras.util.WbsPlugin;
 import wbs.extras.util.WbsSettings;
 
@@ -75,6 +85,30 @@ public class ExtrasSettings extends WbsSettings {
 	
 	private void loadChat() {
 		FileConfiguration chat = configs.get("chat");
+		
+		ConfigurationSection tabCompletions = chat.getConfigurationSection("tab-completions");
+		if (tabCompletions != null) {
+			for (String command : tabCompletions.getKeys(false)) {
+				ConfigurationSection commandSection = tabCompletions.getConfigurationSection(command);
+				
+				command = command.toLowerCase();
+				
+				HashMultimap<Integer, String> argAdditions = HashMultimap.create();
+				for (String argString : commandSection.getKeys(false)) {
+					try {
+						int argNumber = Integer.parseInt(argString);
+						List<String> additions = commandSection.getStringList(argString);
+						
+						argAdditions.putAll(argNumber, additions);
+					} catch (NumberFormatException e) { // Not a number; assume its "override:"
+						boolean override = commandSection.getBoolean("override");
+						
+						tabOverrideBools.put(command, override);
+					}
+				}
+				extraTabs.put(command, argAdditions);
+			}
+		}
 
 		ConfigurationSection graveHighlighting = chat.getConfigurationSection("grave-highlighting");
 		if (graveHighlighting != null) {
@@ -97,6 +131,29 @@ public class ExtrasSettings extends WbsSettings {
 			doChatCoords = chatCoords.getBoolean("enabled", false);
 			chatCoordsPerm = chatCoords.getString("permission", chatCoordsPerm);
 		}
+	}
+	
+	private Map<String, Multimap<Integer, String>> extraTabs = new HashMap<>();
+	private Map<String, Boolean> tabOverrideBools = new HashMap<>();
+	
+	public boolean overrideTabs(String command) {
+		command = command.toLowerCase();
+		command = command.replaceFirst("/", "");
+		if (tabOverrideBools.containsKey(command)) {
+			return tabOverrideBools.get(command);
+		} else {
+			return false;
+		}
+	}
+	
+	public Collection<String> getExtraTabsFor(String command, int argNumber) {
+		command = command.toLowerCase();
+		command = command.replaceFirst("/", "");
+		Multimap<Integer, String> argCompletions = extraTabs.get(command);
+		if (argCompletions == null) {
+			return null;
+		}
+		return argCompletions.get(argNumber);
 	}
 	
 	private boolean doGraveHighlighting = false;
@@ -147,6 +204,8 @@ public class ExtrasSettings extends WbsSettings {
 	
 	private void loadMisc() {
 		FileConfiguration misc = configs.get("misc");
+		
+		String parentDirectory = "misc.yml/";
 
         ConfigurationSection damageIndicator = misc.getConfigurationSection("damage-indicator");
         if (damageIndicator.getBoolean("enabled")) {
@@ -176,12 +235,146 @@ public class ExtrasSettings extends WbsSettings {
         	parseBossBar(bossBar);
         }
         
+        ConfigurationSection books = misc.getConfigurationSection("book-commands");
+        if (books != null && books.getBoolean("enabled")) {
+        	ConfigurationSection commandsSection = books.getConfigurationSection("books");
+        	
+        	final Material bookMat = Material.WRITTEN_BOOK;
+        	
+        	for (String command : commandsSection.getKeys(false)) {
+        		ConfigurationSection commandSection = commandsSection.getConfigurationSection(command);
+        		
+        		ItemStack bookItem = new ItemStack(bookMat);
+        		
+        		BookMeta bookMeta = (BookMeta) Bukkit.getItemFactory().getItemMeta(bookMat);
+        		
+        		for (String pageNumString : commandSection.getKeys(false)) {
+        			int page = -1;
+        			try {
+        				page = Integer.parseInt(pageNumString);
+        			} catch (NumberFormatException e) {
+        				continue;
+        			}
+        			
+        			List<String> lines = commandSection.getStringList(pageNumString);
+        			String pageString = String.join("\n&r", lines);
+        			
+        			pageString = ChatColor.translateAlternateColorCodes('&', pageString);
+        			
+        			bookMeta.setPage(page, pageString);
+        		}
+        		
+        		bookItem.setItemMeta(bookMeta);
+        		
+        		bookCommands.put(command, bookItem);
+        	}
+        }
+        
+        ConfigurationSection cancelContainerSection = misc.getConfigurationSection("cancel-container-drops");
+        if (cancelContainerSection != null) {
+        	cancelContainerDrops = cancelContainerSection.getBoolean("enabled");
+        }
+
+        ConfigurationSection cancelPotionSection = misc.getConfigurationSection("cancel-custom-potions");
+        if (cancelPotionSection != null) {
+        	cancelCustomPotions = cancelPotionSection.getBoolean("enabled");
+        }
+
+        ConfigurationSection dispenserCooldownSection = misc.getConfigurationSection("dispenser-cooldown");
+        if (dispenserCooldownSection != null) {
+        	doDispenserCooldown = dispenserCooldownSection.getBoolean("enabled");
+        	dispenserCooldown = dispenserCooldownSection.getDouble("cooldown") * 20;
+        }
+        
+        ConfigurationSection preventOPFireworksSection = misc.getConfigurationSection("prevent-op-fireworks");
+        if (preventOPFireworksSection != null) {
+        	preventOPFireworks = preventOPFireworksSection.getBoolean("enabled");
+        	effectsThreshold = preventOPFireworksSection.getDouble("effect-amount");
+        }
+
+        ConfigurationSection itemCooldownSection = misc.getConfigurationSection("item-cooldowns");
+        if (itemCooldownSection != null) {
+        	doItemCooldowns = itemCooldownSection.getBoolean("enabled");
+        	ConfigurationSection cooldowns = itemCooldownSection.getConfigurationSection("cooldowns");
+        	double cooldown = 0;
+        	for (String materialString : cooldowns.getKeys(false)) {
+        		Material mat = WbsEnums.materialFromString(materialString);
+        		String directory = parentDirectory + "item-cooldowns/cooldowns/" + materialString;
+        		
+        		if (mat == null) {
+        			logError("Invalid material: " + materialString, directory);
+        		} else {
+        			cooldown = cooldowns.getDouble(materialString);
+        			if (cooldown <= 0) {
+            			logError("Invalid cooldown length (use a positive number).", directory);
+        			} else {
+        				itemCooldowns.put(mat, cooldown * 20);
+        			}
+        		}
+        	}
+        }
 	}
+
+	private boolean doItemCooldowns = false;
+	public boolean doItemCooldowns() {
+		return doItemCooldowns;
+	}
+	
+	private Map<Material, Double> itemCooldowns = new HashMap<>();
+	public Set<Material> getCooldownItems() {
+		return itemCooldowns.keySet();
+	}
+	
+	public Double getCooldownFor(Material type) {
+		return itemCooldowns.get(type);
+	}
+	
+	private double effectsThreshold = 5;
+	public double getEffectsThreshold() {
+		return effectsThreshold;
+	}
+	
+	private boolean preventOPFireworks = false;
+	public boolean preventOPFireworks() {
+		return preventOPFireworks;
+	}
+	
+	private boolean doDispenserCooldown = false;
+	public boolean doDispenserCooldown() {
+		return doDispenserCooldown;
+	}
+	private double dispenserCooldown = 40; // In ticks
+	public double getDispenserCooldown() {
+		return dispenserCooldown;
+	}
+	
+	private boolean cancelCustomPotions = false;
+	public boolean cancelCustomPotions() {
+		return cancelCustomPotions;
+	}
+	
+	// Cancel container drops
+	private boolean cancelContainerDrops = false;
+	public boolean cancelContainerDrops() {
+		return cancelContainerDrops;
+	}
+	
+	
+	// Book commands
+	private boolean doBookCommands = false;
+	public boolean doBookCommands() {
+		return doBookCommands;
+	}
+	
+	private Map<String, ItemStack> bookCommands = new HashMap<>();
+	public ItemStack getBookForCommand(String command) {
+		return bookCommands.get(command);
+	}
+	
 	
 	// Boss bar
 	private void parseBossBar(ConfigurationSection specs) {
 		double intervalDouble = (specs.getDouble("interval") * 20);
-		System.out.println(intervalDouble);
 		long interval = (long) intervalDouble;
 		if (interval <= 0) {
 			logError("Progress must be positive.", "misc.yml/boss-bar/interval");

@@ -32,7 +32,6 @@ public class CommandSpyCommand extends WbsMessenger implements CommandExecutor, 
 	}
 
 	private final String permission = "wbsextras.staff.commandspy";
-	private final String permissionMessage = "&wYou do not have access to this command!";
 	private final String usage = "Usage: &h/commandspy <commands|players> <add|list|remove> [args]";
 	
 	@Override
@@ -49,6 +48,7 @@ public class CommandSpyCommand extends WbsMessenger implements CommandExecutor, 
 		
 		if (!(sender instanceof Player)) {
 			sendMessage("This command is only usable by players.", sender);
+			return true;
 		}
 		Player player = (Player) sender;
 		
@@ -169,7 +169,7 @@ public class CommandSpyCommand extends WbsMessenger implements CommandExecutor, 
 		switch (args[0].toLowerCase()) {
 		case "player":
 		case "players":
-			Set<String> watchedPlayers = data.getSpyPlayers();
+			List<String> watchedPlayers = data.getSpyPlayers();
 			if (watchedPlayers.isEmpty()) {
 				sendMessage("You are not currently watching any players commands!", player);
 			} else {
@@ -183,7 +183,7 @@ public class CommandSpyCommand extends WbsMessenger implements CommandExecutor, 
 			break;
 		case "command":
 		case "commands":
-			Set<String> watchedCommands = data.getSpyCommands();
+			List<String> watchedCommands = data.getSpyCommands();
 			if (watchedCommands.isEmpty()) {
 				sendMessage("You are not currently watching any commands!", player);
 			} else {
@@ -215,6 +215,38 @@ public class CommandSpyCommand extends WbsMessenger implements CommandExecutor, 
 				choices.add("add");
 				choices.add("remove");
 				choices.add("list");
+			}
+			
+			if (length == 3) {
+				PlayerData data = PlayerData.getPlayerData(sender.getName());
+				
+				String arg1 = args[1].toLowerCase();
+				
+				switch (args[0].toLowerCase()) {
+				case "player":
+				case "players":
+					if (arg1.equals("remove")) {
+						if (data == null) {
+							return choices;
+						}
+						choices = data.getSpyPlayers();
+					} else if (arg1.equals("add")) {
+						for (Player player : Bukkit.getOnlinePlayers()) {
+							choices.add(player.getName());
+						}
+					}
+					break;
+				case "command":
+				case "commands":
+					if (arg1.equals("remove")) {
+						if (data == null) {
+							return choices;
+						}
+						choices = data.getSpyCommands();
+					}
+					break;
+					
+				}
 			}
 		}
 		

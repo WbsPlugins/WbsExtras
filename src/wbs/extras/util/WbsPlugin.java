@@ -4,7 +4,9 @@ import java.util.logging.Logger;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -44,6 +46,14 @@ public class WbsPlugin extends JavaPlugin {
 	public void sendActionBar(String message, Player player) {
 		message = ChatColor.translateAlternateColorCodes('&', message);
 		player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new ComponentBuilder(message).create());
+	}
+	
+	public void broadcastActionBar(String message, double radius, Location loc) {
+		for (Entity entity : loc.getWorld().getNearbyEntities(loc, 10, 10, 10)) {
+			if (entity instanceof Player) {
+				sendActionBar(message, (Player) entity);
+			}
+		}
 	}
 	
 	private ChatColor colour = ChatColor.GREEN;

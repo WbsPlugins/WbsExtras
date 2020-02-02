@@ -16,6 +16,40 @@ damage-indicator:
 # Misc #
 ########
 
+book-commands:
+  enabled: false
+  books:
+    examplebook: # The name of your command; in this case, /examplebook will open the book.
+      '1': # The page
+      - 'This is the example book from WbsExtras!'
+      - 'Adding more strings will act as a new line, but normal text wrapping still occurs!'
+      - 'You can add &5colours &rjust like you would in chat!'
+      '2':
+      - 'If your text doesn''t fit onto one page, just add a new one with another section.'
+      
+# On some creative servers, you might want to stop people from filling chests
+# and dropping hundreds of items at a time.
+cancel-container-drops:
+  enabled: false
+
+cancel-custom-potions:
+  enabled: false
+  
+dispenser-cooldown:
+  enabled: false
+  cooldown: 2 # in seconds
+
+prevent-op-fireworks:
+  enabled: false
+  effects-amount: 5 # A firework with more effects than this number will be cancelled.
+
+item-cooldowns:
+  enabled: false
+  cooldowns:
+    firework_rocket: 2 # In seconds
+#    lava_bucket: 2
+#    water_bucket: 1
+
 vote-sleep:
   enabled: false
   percent-required: 50
@@ -32,6 +66,6 @@ boss-bar:
     default1:
       # The message you wish to display to players 
       message: 'This is a default message!'
-      colour: RED
-      style: SOLID
-      progress: 1.0
+      colour: RED # This can be BLUE, GREEN, PINK, YELLOW, PURPLE, RED, WHITE
+      style: SOLID # This can be SOLID, SEGMENTED_10, SEGMENTED_12, SEGMENTED_20, SEGMENTED_6
+      progress: 1.0 # How far the health bar is

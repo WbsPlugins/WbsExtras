@@ -1,11 +1,15 @@
 package wbs.extras.listeners;
 
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Formatter;
 
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Sound;
@@ -14,6 +18,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.server.TabCompleteEvent;
 
 import wbs.extras.ExtrasSettings;
 import wbs.extras.WbsExtras;
@@ -28,6 +33,37 @@ public class ChatListener extends WbsMessenger implements Listener {
 	public ChatListener(WbsExtras plugin) {
 		super(plugin);
 		settings = plugin.settings;
+	}
+	
+	@EventHandler
+	public void onTabComplete(TabCompleteEvent event) {
+		String buffer = event.getBuffer();
+		
+		String[] args = buffer.split(" ", -1);
+		
+		String command = args[0];
+		int argNumber = args.length - 1;
+		
+		Collection<String> additions = settings.getExtraTabsFor(command, argNumber);
+		if (additions != null) {
+			List<String> completions = null;
+			if (settings.overrideTabs(command)) {
+				completions = new LinkedList<>();
+			} else {
+				completions = event.getCompletions();
+			}
+			
+			completions.addAll(additions);
+			
+	    	List<String> result = new ArrayList<String>();
+			for (String add : completions) {
+	    		if (add.toLowerCase().startsWith(args[args.length-1].toLowerCase())) {
+	    			result.add(add);
+	    		}
+			}
+			
+			event.setCompletions(result);
+		}
 	}
 
 	@EventHandler(priority=EventPriority.HIGH, ignoreCancelled=true)

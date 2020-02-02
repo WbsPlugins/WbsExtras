@@ -72,7 +72,7 @@ public class StaffListener extends WbsMessenger implements Listener {
 		} else if (PlayerData.isWatchedPlayer(player.getName())) {
 			for (PlayerData data : PlayerData.getPlayersWatchingPlayer(username)) {
 				String watcherUsername = data.getName();
-				if (watcherUsername.equals(username)) {
+				if (watcherUsername.equalsIgnoreCase(username)) {
 					continue;
 				}
 				Player watcher = Bukkit.getPlayer(watcherUsername);
@@ -122,7 +122,7 @@ public class StaffListener extends WbsMessenger implements Listener {
 	/*                  STAFF CHAT                  */
 	/************************************************/
 	
-	@EventHandler(priority=EventPriority.NORMAL)
+	@EventHandler(priority=EventPriority.LOW)
 	public void staffChat(AsyncPlayerChatEvent event) {
 		if (!settings.doStaffChat()) {
 			return;
@@ -163,6 +163,7 @@ public class StaffListener extends WbsMessenger implements Listener {
 		if (!settings.logLastCommand()) {
 			return;
 		}
+		
 		Player player = event.getPlayer();
 		
 		if (player.hasPermission("wbsextras.staff.lastcommand.exempt")) {
@@ -170,6 +171,11 @@ public class StaffListener extends WbsMessenger implements Listener {
 		}
 		
 		String command = event.getMessage();
+		
+		if (command.startsWith("/plugman")) { // Probably a better way to do this, but atm unloading causes issues
+			return;
+		}
+		
 		for (String ignore : settings.getLastCommandBlacklist()) {
 			if (command.startsWith("/" + ignore)) {
 				return;

@@ -1,9 +1,15 @@
 package wbs.extras.listeners;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.temporal.TemporalUnit;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.bukkit.Bukkit;
+import org.bukkit.FireworkEffect;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -11,10 +17,12 @@ import org.bukkit.Tag;
 import org.bukkit.World;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Block;
+import org.bukkit.block.Container;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Waterlogged;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Firework;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
@@ -22,24 +30,37 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockDispenseEvent;
 import org.bukkit.event.block.BlockFadeEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.ExplosionPrimeEvent;
+import org.bukkit.event.entity.FireworkExplodeEvent;
 import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerBedLeaveEvent;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerBedEnterEvent.BedEnterResult;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.FireworkMeta;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.inventory.meta.SpawnEggMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.potion.Potion;
+import org.bukkit.potion.PotionData;
+import org.bukkit.potion.PotionType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
+
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Table;
 
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ChatMessageType;
@@ -49,6 +70,7 @@ import wbs.extras.WbsExtras;
 import wbs.extras.configurations.BarAnnouncement;
 import wbs.extras.util.WbsMessenger;
 import wbs.extras.util.WbsStrings;
+import wbs.extras.util.WbsTime;
 
 public class MiscListener extends WbsMessenger implements Listener {
 
@@ -56,6 +78,177 @@ public class MiscListener extends WbsMessenger implements Listener {
 	public MiscListener(WbsExtras plugin) {
 		super(plugin);
 		settings = plugin.settings;
+	}
+	
+	/************************************************/
+	/*				Item Cooldown			  		*/
+	/************************************************/
+	
+	private Table<Player, Material, LocalDateTime> itemCooldowns = HashBasedTable.create();
+	
+	@EventHandler
+	public void onItemUse(PlayerInteractEvent event) {
+		if (!settings.doItemCooldowns()) {
+			return;
+		}
+		
+		if (event.getHand() != EquipmentSlot.HAND) {
+			return;
+		}
+		
+		switch (event.getAction()) {
+		case RIGHT_CLICK_AIR:
+		case RIGHT_CLICK_BLOCK:
+			break;
+		default:
+			return;
+		}
+		
+		Player player = event.getPlayer();
+		Material type = player.getInventory().getItemInMainHand().getType();
+		
+		Double cooldown = settings.getCooldownFor(type);
+		if (cooldown != null) {
+			LocalDateTime lastUse = itemCooldowns.get(player, type);
+			LocalDateTime now = LocalDateTime.now();
+			if (lastUse == null) {
+				itemCooldowns.put(player, type, now);
+			} else {
+				Duration between = Duration.between(lastUse, now);
+				if (between.toMillis() / 50 < cooldown) {
+					LocalDateTime unlockTime = lastUse.plusNanos((long) (cooldown / 20 * 1000000000.0));
+					Duration timeLeft = Duration.between(LocalDateTime.now(), unlockTime);
+					String timeLeftString = WbsTime.prettyTime(timeLeft);
+					sendActionBar("&cYou can use that again in " + timeLeftString + ".", player);
+					event.setCancelled(true);
+				} else {
+					itemCooldowns.put(player, type, now);
+				}
+			}
+		}
+	}
+
+	/************************************************/
+	/*			Prevent Crazy Fireworks		  		*/
+	/************************************************/
+
+	@EventHandler
+	public void onFireworkLaunch(FireworkExplodeEvent event) {
+		if (!settings.preventOPFireworks()) {
+			return;
+		}
+		
+		FireworkMeta fireworkMeta = event.getEntity().getFireworkMeta();
+		if (fireworkMeta.getEffectsSize() > settings.getEffectsThreshold()) {
+			event.setCancelled(true);
+			Location loc = event.getEntity().getLocation();
+			broadcastActionBar("&cThis firework had too many effects.", 10, loc);
+		}
+	}
+
+	/************************************************/
+	/*				Dispenser Cooldown		  		*/
+	/************************************************/
+	
+	private final Map<Location, LocalDateTime> lastDispense = new HashMap<>();
+	
+	@EventHandler
+	public void onDispenseCooldown(BlockDispenseEvent event) {
+		if (!settings.doDispenserCooldown()) {
+			return;
+		}
+		Location loc = event.getBlock().getLocation();
+		
+		if (lastDispense.containsKey(loc)) {
+			long ticksSinceLastDispense = Duration.between(lastDispense.get(loc), LocalDateTime.now()).toMillis() / 50;
+			if (ticksSinceLastDispense <= settings.getDispenserCooldown()) {
+				event.setCancelled(true);
+			} else {
+				lastDispense.put(loc, LocalDateTime.now());
+			}
+		} else {
+			lastDispense.put(loc, LocalDateTime.now());
+		}
+	}
+
+	/************************************************/
+	/*				Cancel Custom Potions	  		*/
+	/************************************************/
+
+	@EventHandler
+	public void onDispense(BlockDispenseEvent event) {
+		Block block = event.getBlock();
+		
+		if (block.getType() == Material.DISPENSER) {
+			ItemStack item = event.getItem();
+			
+			if (settings.cancelCustomPotions()) {
+				if (isCustomPotion(item)) {
+					event.setCancelled(true);
+					for (Entity entity : block.getWorld().getNearbyEntities(block.getLocation(), 3, 3, 3)) {
+						if (entity instanceof Player) {
+							sendActionBar("&cYou cannot dispense custom potions.", (Player) entity);
+						}
+					}
+				}
+			}
+		} 
+	}
+	
+	private boolean isCustomPotion(ItemStack item) {
+		if (item.getType() != Material.LINGERING_POTION && item.getType() != Material.SPLASH_POTION) {
+			return false;
+		}
+
+		ItemMeta meta = item.getItemMeta();
+		if (meta != null) {
+			if (meta instanceof PotionMeta) {
+				PotionMeta potionMeta = (PotionMeta) meta;
+				PotionData data = potionMeta.getBasePotionData();
+				
+				if (data.getType() == PotionType.UNCRAFTABLE) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	/************************************************/
+	/*				Cancel Container Drops	  		*/
+	/************************************************/
+	
+	@EventHandler(ignoreCancelled=true,priority=EventPriority.HIGHEST)
+	public void onContainerBreak(BlockBreakEvent event) {
+		if (!settings.cancelContainerDrops()) {
+			return;
+		}
+		
+		Block block = event.getBlock();
+		if (block.getState() instanceof Container) {
+			if (block.getType() != Material.SHULKER_BOX) {
+				((Container) block.getState()).getInventory().clear();
+			}
+		}
+	}
+	
+
+	/************************************************/
+	/*				   Book Commands	  			*/
+	/************************************************/
+	
+	@EventHandler(ignoreCancelled=true)
+	public void onCommand(PlayerCommandPreprocessEvent event) {
+		if (!settings.doBookCommands()) return;
+		
+		String command = event.getMessage();
+
+		ItemStack book = settings.getBookForCommand(command);
+		if (book != null) {
+			event.setCancelled(true);
+			
+		//	event.getPlayer().openBook(book); // Needs 1.14 rip
+		}
 	}
 	
 	/************************************************/

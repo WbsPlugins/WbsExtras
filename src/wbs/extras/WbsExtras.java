@@ -44,18 +44,16 @@ public class WbsExtras extends WbsPlugin {
 		
 		settings = new ExtrasSettings(this);
 
-		settings.reload();
-
 		PlayerData.setPlugin(this);
 		PlayerData.loadAll();
 		
 	//	startBackupTimers();
 		
 		if (!setupEconomy()) {
-			logger.severe("No Vault dependency found! Monetary commands disabled.");
+			logger.warning("No Vault dependency found! Monetary commands disabled.");
 		}
 		if (!setupEssentials()) {
-			logger.info("Essentials not found.");
+			logger.warning("Essentials not found.");
 		}
 		
 		getCommand("lastcommand").setExecutor(new LastCommandCommand(this));
