@@ -29,6 +29,11 @@ public class WbsExtras extends WbsPlugin {
 	public static Economy getEconomy() {
 		return econ;
 	}
+	
+	private static WbsExtras instance = null;
+	public static WbsExtras getInstance() {
+		return instance;
+	}
 
 	/************************************************/
 	/*					END OF STATIC				*/
@@ -38,6 +43,8 @@ public class WbsExtras extends WbsPlugin {
 	
 	@Override
 	public void onEnable() {
+		instance = this;
+		
 		if (!getDataFolder().exists()) {
 			getDataFolder().mkdir();
 		}

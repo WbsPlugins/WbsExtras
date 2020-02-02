@@ -74,7 +74,7 @@ public class SerializablePlayer implements Serializable {
 	
 	public boolean needsTag = false;
 	
-	private List<String> triggers = new LinkedList<>();
+	List<String> triggers = new LinkedList<>();
 	
 	public List<String> getTriggers() {
 		return triggers;
@@ -117,7 +117,7 @@ public class SerializablePlayer implements Serializable {
 	/************************************************/
 	
 	// The commands to watch for this player
-	private List<String> spyCommands = new LinkedList<>();
+	List<String> spyCommands = new LinkedList<>();
 	
 	public boolean addSpyCommand(String newCommand) {
 		for (String existing : spyCommands) {
@@ -148,7 +148,7 @@ public class SerializablePlayer implements Serializable {
 	}
 	
 	// The usernames of players that this player is watching
-	private List<String> spyUsernames = new LinkedList<>();
+	List<String> spyUsernames = new LinkedList<>();
 
 	public boolean addSpyPlayer(String player) {
 		for (String existing : spyUsernames) {
@@ -182,7 +182,7 @@ public class SerializablePlayer implements Serializable {
 	/*                  ITEM HISTORY                */
 	/************************************************/
 
-	private List<BaseComponent[]> itemHistory = null;
+	private transient List<BaseComponent[]> itemHistory = null;
 
 	public List<BaseComponent[]> getLastNItemInteractions(int n) {
 		List<BaseComponent[]> returnList = new LinkedList<>();
@@ -265,7 +265,7 @@ public class SerializablePlayer implements Serializable {
 	/************************************************/
 	
 	
-	private List<String> lastCommands = null;
+	List<String> lastCommands = null;
 	
 	public List<String> getLastNCommands(int n) {
 		List<String> returnList = new LinkedList<>();
