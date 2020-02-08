@@ -11,7 +11,48 @@ damage-indicator:
   enabled: false
   # Set this to false if you want it to only work on mobs
   show-player-health: true
+
+#########################
+# Creative Server Utils #
+#########################
+
+# This will destroy all items that would be dropped when breaking
+# a chest, dispenser, furnace etc. Useful to stop item spam on creative servers.
+cancel-container-drops:
+  enabled: false
+
+# A custom potion is any uncraftable potion.
+cancel-custom-potions:
+  enabled: false
   
+prevent-op-fireworks:
+  enabled: false
+  effects-amount: 5 # A firework with more effects than this number will be cancelled.
+  
+#############
+# Cooldowns #
+#############
+
+dispenser-cooldown:
+  enabled: false
+  cooldown: 2 # in seconds
+
+# How often an item type can be right clicked.
+item-cooldowns:
+  enabled: false
+  cooldowns:
+    firework_rocket: 2 # In seconds
+#    lava_bucket: 2
+#    water_bucket: 1
+
+#########################
+# Survival Server Utils #
+#########################
+
+vote-sleep:
+  enabled: false
+  percent-required: 50
+
 ########
 # Misc #
 ########
@@ -27,38 +68,12 @@ book-commands:
       '2':
       - 'If your text doesn''t fit onto one page, just add a new one with another section.'
       
-# On some creative servers, you might want to stop people from filling chests
-# and dropping hundreds of items at a time.
-cancel-container-drops:
-  enabled: false
-
-cancel-custom-potions:
-  enabled: false
-  
-dispenser-cooldown:
-  enabled: false
-  cooldown: 2 # in seconds
-
-prevent-op-fireworks:
-  enabled: false
-  effects-amount: 5 # A firework with more effects than this number will be cancelled.
-
-item-cooldowns:
-  enabled: false
-  cooldowns:
-    firework_rocket: 2 # In seconds
-#    lava_bucket: 2
-#    water_bucket: 1
-
-vote-sleep:
-  enabled: false
-  percent-required: 50
-  
 world-tweaks:
   disable-coral-fade: false
   disable-spawner-changing: false
   tnt-breaks-waterlogged: false
-
+  
+  
 boss-bar:
   enabled: false
   interval: 15 # in seconds

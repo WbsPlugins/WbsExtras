@@ -35,6 +35,21 @@ last-command:
   - t
   - whisper
   
+# Players with wbsextras.staff.irondoorbypass may open iron doors & trapdoors as if they were wooden.
+bypass-iron-doors:
+  enabled: false
+  
+# Some plugins catch messages and cancel them at the same
+# priority as essentials local spy, which can result in double
+# sending. Add characters here to ignore from local spy.
+# For example, if a plugin uses @ at the start of a message
+# to send a message to specific people, and essentials local
+# spy is catching it, you can add it here to prevent this issue.
+essentials-local-filter:
+  enabled: false
+  characters:
+  - '@'
+  
 staff-chat:
   enabled: false
   # When a player with wbsextras.staff.chat puts this character at the start of their message,

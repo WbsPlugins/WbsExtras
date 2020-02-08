@@ -5,10 +5,11 @@ api-version: 1.13
 author: Weber588
 description: A variety of configurable options for various servers 
 commands:
-  notifications:
-    description: Configure chat based notifications
-    permission: wbsextras.notif
-    aliases: [notif, notification]
+
+#######################
+#        STAFF        #
+#######################
+
   lastcommand:
     description: View the last commands run by a specific user
     permission: wbsextras.staff.lastcommand
@@ -20,9 +21,60 @@ commands:
   itemhistory:
     description: View the last item pick ups/drops run by a specific user
     permission: wbsextras.staff.itemhistory
+    
+#######################
+#        CHAT         #
+#######################
+    
+  notifications:
+    description: Configure chat based notifications
+    permission: wbsextras.chat.notif
+    aliases: [notif, notification]
+    
+#######################
+#        MISC         #
+#######################
+
+  signedit:
+    description: Edit a sign after it is already written.
+    permission: wbsextras.misc.signedit
+    aliases: [editsign]
+  colourbook:
+    description: Fill in colour codes in a held written book.
+    permission: wbsextras.misc.colourbook
+    aliases: [colorbook, bookcolour, bookcolor]
+  editbook:
+    description: Unlock a written book to edit further.
+    permission: wbsextras.misc.editbook
+    aliases: [bookedit]
+  nightvision:
+    aliases: [nv]
+    description: Add or remove permanent night vision from the player
+    permission: wbsextras.misc.nightvision
+  display:
+    description: Change the appearance of the held item
+    permission: wbsextras.misc.display
+  itemdata:
+    description: Alter the item data of a held item
+    permission: wbsextras.misc.itemdata
+    
 permissions:
   wbsextras.notif.*:
     description: Chat notification features
+  
+  wbsextras.colourbook:
+    description: The ability to colour books signed by you.
+    children:
+      wbsextras.colourbook.other:
+        description: The ability to colour books signed by others.
+        
+    
+    
+  wbsextras.signedit:
+    description: Access to the /signedit command.
+    children:
+      wbsextras.signedit.looking:
+        description: Change a sign by looking at it, bypassing any other restrictions placed on it by other plugins/protections.
     
   wbsextras.staff.*:
     description: All staff features

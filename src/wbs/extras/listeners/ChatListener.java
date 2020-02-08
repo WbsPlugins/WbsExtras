@@ -20,6 +20,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.server.TabCompleteEvent;
 
+import net.ess3.api.events.LocalChatSpyEvent;
 import wbs.extras.ExtrasSettings;
 import wbs.extras.WbsExtras;
 import wbs.extras.configurations.Replacement;
@@ -35,6 +36,7 @@ public class ChatListener extends WbsMessenger implements Listener {
 		super(plugin);
 		settings = plugin.settings;
 	}
+	
 	
 	@EventHandler
 	public void onTabComplete(TabCompleteEvent event) {

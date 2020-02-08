@@ -3,23 +3,29 @@ package wbs.extras;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
+
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import net.milkbowl.vault.economy.Economy;
-import wbs.extras.commands.CommandSpyCommand;
-import wbs.extras.commands.ItemHistoryCommand;
-import wbs.extras.commands.LastCommandCommand;
-import wbs.extras.commands.NotificationsCommand;
+
+import wbs.extras.commands.*;
+import wbs.extras.commands.misc.*;
+import wbs.extras.commands.staff.*;
+
 import wbs.extras.configurations.BarAnnouncement;
+
 import wbs.extras.listeners.ChatListener;
+import wbs.extras.listeners.EssentialsListener;
 import wbs.extras.listeners.MiscListener;
 import wbs.extras.listeners.StaffListener;
+
 import wbs.extras.player.PlayerStore;
 import wbs.extras.player.PlayerData;
 import wbs.extras.player.PlayerDataAdapter;
+
 import wbs.extras.util.WbsPlugin;
 
 public class WbsExtras extends WbsPlugin {
@@ -57,9 +63,24 @@ public class WbsExtras extends WbsPlugin {
 
 		PlayerStore.setPlugin(this);
 		PlayerData.setPlugin(this);
-		
-		PlayerStore.getInstance().loadAll();
 
+		loadPlayerData();
+		
+		if (!setupEconomy()) {
+			logger.warning("No Vault dependency found! Monetary commands disabled.");
+		}
+		if (!setupEssentials()) {
+			logger.warning("Essentials not found.");
+		}
+		
+		setupStaffCommands();
+		setupChatCommands();
+		setupMiscCommands();
+		
+		registerEvents();
+	}
+	
+	private void loadPlayerData() {
 		final File data = new File(getDataFolder() + File.separator + "player.data");
 		
 		if (!data.exists()) {
@@ -71,27 +92,54 @@ public class WbsExtras extends WbsPlugin {
 			}
 		}
 		
-		int legacyLoaded = PlayerDataAdapter.loadOldPlayers();
-		
-		logger.info("Loaded " + legacyLoaded + " legacy players from configs.");
-		
-		if (legacyLoaded > 0) {
-			PlayerStore.getInstance().saveAll();
+		PlayerStore.getInstance().loadAll();
 
-			int legacyDeleted = PlayerDataAdapter.removeLegacyFolder();
-			logger.info("Successfully deleted " + legacyDeleted + " legacy player files.");
+		File legacyPlayerDir = new File(getDataFolder() + File.separator + "player_data");
+		if (legacyPlayerDir.exists()) {
+			int legacyLoaded = PlayerDataAdapter.loadOldPlayers();
+			
+			logger.info("Loaded " + legacyLoaded + " legacy players from configs.");
+			
+			if (legacyLoaded > 0) {
+				PlayerStore.getInstance().saveAll();
+
+				int legacyDeleted = PlayerDataAdapter.removeLegacyFolder();
+				logger.info("Successfully deleted " + legacyDeleted + " legacy player files.");
+			}
 		}
-		
-		
-	//	startBackupTimers();
-		
-		if (!setupEconomy()) {
-			logger.warning("No Vault dependency found! Monetary commands disabled.");
+	}
+	
+	private void registerEvents() {
+		PluginManager pm = Bukkit.getServer().getPluginManager();
+		pm.registerEvents(new ChatListener(this), this);
+		pm.registerEvents(new MiscListener(this), this);	
+		pm.registerEvents(new StaffListener(this), this);
+
+		if (essentialsInstalled) {
+			pm.registerEvents(new EssentialsListener(this), this);
 		}
-		if (!setupEssentials()) {
-			logger.warning("Essentials not found.");
-		}
+	}
+	
+	private void setupMiscCommands() {
+		getCommand("signedit").setExecutor(new SignEditCommand(this));
+		getCommand("signedit").setTabCompleter(new SignEditCommand(this));
+
+		getCommand("colourbook").setExecutor(new ColourBookCommand(this));
 		
+		getCommand("editbook").setExecutor(new EditBookCommand(this));
+
+		getCommand("display").setExecutor(new DisplayCommand(this));
+		getCommand("display").setTabCompleter(new DisplayCommand(this));
+
+		getCommand("nightvision").setExecutor(new NightVisionCommand(this));
+	}
+	
+	private void setupChatCommands() {
+		getCommand("notifications").setExecutor(new NotificationsCommand(this));
+		getCommand("notifications").setTabCompleter(new NotificationsCommand(this));
+	}
+	
+	private void setupStaffCommands() {
 		getCommand("lastcommand").setExecutor(new LastCommandCommand(this));
 		getCommand("lastcommand").setTabCompleter(new LastCommandCommand(this));
 
@@ -100,14 +148,6 @@ public class WbsExtras extends WbsPlugin {
 
 		getCommand("commandspy").setExecutor(new CommandSpyCommand(this));
 		getCommand("commandspy").setTabCompleter(new CommandSpyCommand(this));
-		
-		getCommand("notifications").setExecutor(new NotificationsCommand(this));
-		getCommand("notifications").setTabCompleter(new NotificationsCommand(this));
-		
-		PluginManager pm = Bukkit.getServer().getPluginManager();
-		pm.registerEvents(new ChatListener(this), this);
-		pm.registerEvents(new MiscListener(this), this);
-		pm.registerEvents(new StaffListener(this), this);
 	}
 	
 	private void startBackupTimers() {

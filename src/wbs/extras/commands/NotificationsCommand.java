@@ -98,7 +98,7 @@ public class NotificationsCommand extends WbsMessenger implements CommandExecuto
 				String newString = String.join(" ", newStringList); // Combining last args to form a phrase
 				
 				for (String phrase : notificationWords) {
-					if (phrase.equals(newString)) {
+					if (phrase.equalsIgnoreCase(newString)) {
 	    				sendMessage("That word is already in your notification list!", player);
 	    				return true;
 					}

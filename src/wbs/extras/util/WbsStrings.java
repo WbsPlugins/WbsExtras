@@ -6,6 +6,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.bukkit.ChatColor;
+
 import jdk.internal.joptsimple.internal.Strings;
 
 public abstract class WbsStrings {
@@ -122,5 +124,31 @@ public abstract class WbsStrings {
 			newStringList[i] = strings[i];
 		}
 		return String.join(with, newStringList);
+	}
+	
+	private static String[] colourCodes = {
+			"&0", "&1", "&2", "&3", "&4", "&5",
+			"&6", "&7", "&8", "&9",
+			
+			"&a", "&b", "&c",
+			"&d", "&e", "&f",
+			
+			"&o", "&l", "&n",
+			"&m", "&k"
+	};
+	
+	public static String undoColourText(String colouredText) {
+        char[] uncolouredArray = colouredText.toCharArray();
+        for (int i = 0; i < uncolouredArray.length - 1; i++) {
+            if (uncolouredArray[i] == ChatColor.COLOR_CHAR && "0123456789AaBbCcDdEeFfKkLlMmNnOoRr".indexOf(uncolouredArray[i+1]) > -1) {
+            	uncolouredArray[i] = '&';
+            	uncolouredArray[i+1] = Character.toLowerCase(uncolouredArray[i+1]);
+            }
+        }
+        String uncoloured = new String(uncolouredArray);
+        if (uncoloured.endsWith("&r")) {
+        	uncoloured = uncoloured.substring(0, uncolouredArray.length);
+        }
+        return uncoloured;
 	}
 }

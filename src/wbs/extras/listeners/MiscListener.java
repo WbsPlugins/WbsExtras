@@ -17,7 +17,9 @@ import org.bukkit.Tag;
 import org.bukkit.World;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
 import org.bukkit.block.Container;
+import org.bukkit.block.Sign;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Waterlogged;
 import org.bukkit.entity.Entity;
@@ -41,7 +43,9 @@ import org.bukkit.event.entity.FireworkExplodeEvent;
 import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerBedLeaveEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.event.player.PlayerEditBookEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerBedEnterEvent.BedEnterResult;
 import org.bukkit.inventory.EquipmentSlot;
@@ -68,6 +72,8 @@ import net.md_5.bungee.api.chat.ComponentBuilder;
 import wbs.extras.ExtrasSettings;
 import wbs.extras.WbsExtras;
 import wbs.extras.configurations.BarAnnouncement;
+import wbs.extras.player.PlayerData;
+import wbs.extras.player.PlayerStore;
 import wbs.extras.util.WbsMessenger;
 import wbs.extras.util.WbsStrings;
 import wbs.extras.util.WbsTime;
@@ -78,6 +84,66 @@ public class MiscListener extends WbsMessenger implements Listener {
 	public MiscListener(WbsExtras plugin) {
 		super(plugin);
 		settings = plugin.settings;
+	}
+	/************************************************/
+	/*					Colour Book			  		*/
+	/************************************************/
+	
+	@EventHandler
+	public void onSignBook(PlayerEditBookEvent event) {
+		Player player = event.getPlayer();
+		if (event.isSigning()) {
+			if (player.hasPermission("wbsextras.colourbook")) {
+				for (String pageText : event.getNewBookMeta().getPages()) {
+					if (!pageText.equals(ChatColor.translateAlternateColorCodes('&', pageText))) {
+						sendMessage("You may now colour the book with &h/colourbook&r!", player);
+						return;
+					}
+				}
+			}
+		}
+	}
+
+	/************************************************/
+	/*					Sign edit			  		*/
+	/************************************************/
+	
+	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
+	public void onRightClickOnSign(PlayerInteractEvent event) {
+		if (event.isCancelled()) {
+			return;
+		}
+		if (event.getHand() != EquipmentSlot.HAND) {
+			return;
+		}
+		if (event.getAction() != Action.RIGHT_CLICK_BLOCK) {
+			return;
+		}
+		
+		Block block = event.getClickedBlock();
+		if (event.getClickedBlock() == null) { // This shouldn't come up but doesn't hurt
+			return;
+		}
+		
+		BlockState blockState = block.getState();
+		if (!(blockState instanceof Sign)) {
+			return;
+		}
+		Player player = event.getPlayer();
+		
+		PlayerStore store = PlayerStore.getInstance();
+		PlayerData data = store.getPlayerData(player.getName());
+		
+		if (data.signEditLine != 0) {
+			Sign signState = (Sign) blockState;
+			signState.setLine(data.signEditLine - 1, data.signEditString);
+			signState.update();
+			sendMessage("Sign changed!", player);
+		
+			data.signEditLine = 0;
+			data.signEditString = null;
+		}
+
 	}
 	
 	/************************************************/
@@ -138,10 +204,13 @@ public class MiscListener extends WbsMessenger implements Listener {
 			return;
 		}
 		
-		FireworkMeta fireworkMeta = event.getEntity().getFireworkMeta();
+		Firework firework = event.getEntity();
+		
+		FireworkMeta fireworkMeta = firework.getFireworkMeta();
 		if (fireworkMeta.getEffectsSize() > settings.getEffectsThreshold()) {
 			event.setCancelled(true);
-			Location loc = event.getEntity().getLocation();
+			firework.remove();
+			Location loc = firework.getLocation();
 			broadcastActionBar("&cThis firework had too many effects.", 10, loc);
 		}
 	}
@@ -176,6 +245,44 @@ public class MiscListener extends WbsMessenger implements Listener {
 	/************************************************/
 
 	@EventHandler
+	public void onPotionThrow(PlayerInteractEvent event) {
+		if (event.getHand() != EquipmentSlot.HAND) {
+			return;
+		}
+		if (event.getAction() != Action.RIGHT_CLICK_AIR && event.getAction() != Action.RIGHT_CLICK_BLOCK) {
+			return;
+		}
+		
+		ItemStack item = event.getItem();
+		if (item == null) {
+			return;
+		}
+		
+		if (item.getType() != Material.SPLASH_POTION && item.getType() != Material.LINGERING_POTION) {
+			return;
+		}
+		
+		Player player = event.getPlayer();
+		
+		if (isCustomPotion(item)) {
+			event.setCancelled(true);
+			sendActionBar("&cYou cannot use custom potions.", player);
+		}
+	}
+	
+	@EventHandler
+	public void onDrinkPotion(PlayerItemConsumeEvent event) {
+		ItemStack item = event.getItem();
+		
+		Player player = event.getPlayer();
+		
+		if (isCustomPotion(item)) {
+			event.setCancelled(true);
+			sendActionBar("&cYou cannot use custom potions.", player);
+		}
+	}
+	
+	@EventHandler
 	public void onDispense(BlockDispenseEvent event) {
 		Block block = event.getBlock();
 		
@@ -196,7 +303,7 @@ public class MiscListener extends WbsMessenger implements Listener {
 	}
 	
 	private boolean isCustomPotion(ItemStack item) {
-		if (item.getType() != Material.LINGERING_POTION && item.getType() != Material.SPLASH_POTION) {
+		if (item.getType() != Material.POTION && item.getType() != Material.LINGERING_POTION && item.getType() != Material.SPLASH_POTION) {
 			return false;
 		}
 

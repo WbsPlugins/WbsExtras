@@ -1,4 +1,4 @@
-package wbs.extras.commands;
+package wbs.extras.commands.staff;
 
 import java.util.ArrayList;
 import java.util.LinkedList;

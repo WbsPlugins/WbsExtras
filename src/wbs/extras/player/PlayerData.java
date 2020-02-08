@@ -67,6 +67,14 @@ public class PlayerData implements Serializable {
 	}
 	
 	/************************************************/
+	/*                Transient values				*/
+	/************************************************/
+	
+	public transient String signEditString = null;
+	public transient byte signEditLine = 0;
+	
+	
+	/************************************************/
 	/*                 Chat Notifier                */
 	/************************************************/
 

@@ -3,6 +3,7 @@ package wbs.extras;
 import java.io.File;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -131,6 +132,7 @@ public class ExtrasSettings extends WbsSettings {
 			doChatCoords = chatCoords.getBoolean("enabled", false);
 			chatCoordsPerm = chatCoords.getString("permission", chatCoordsPerm);
 		}
+
 	}
 	
 	private Map<String, Multimap<Integer, String>> extraTabs = new HashMap<>();
@@ -512,6 +514,37 @@ public class ExtrasSettings extends WbsSettings {
         	commandSpyBlacklist = commandSpy.getStringList("blacklist");
         }
         
+        ConfigurationSection essentialsLocalFilter = staff.getConfigurationSection("essentials-local-filter");
+		if (essentialsLocalFilter != null) {
+			doLocalSpyFilter = essentialsLocalFilter.getBoolean("enabled", false);
+			List<String> characters = essentialsLocalFilter.getStringList("characters");
+			
+			if (characters != null) {
+				for (String charString : characters) {
+					localFilters.add(charString);
+				}
+			}
+		}
+		
+        ConfigurationSection bypassIronDoorsSection = staff.getConfigurationSection("bypass-iron-doors");
+        if (bypassIronDoorsSection != null) {
+        	bypassIronDoors = bypassIronDoorsSection.getBoolean("enabled");
+        }
+	}
+
+	private boolean bypassIronDoors = false;
+	public boolean bypassIronDoors() {
+		return bypassIronDoors;
+	}
+	
+	private boolean doLocalSpyFilter = false;
+	public boolean doLocalSpyFilter() {
+		return doLocalSpyFilter;
+	}
+	
+	private Set<String> localFilters = new HashSet<>();
+	public Set<String> getLocalFilters() {
+		return localFilters;
 	}
 	
 	// Command spy

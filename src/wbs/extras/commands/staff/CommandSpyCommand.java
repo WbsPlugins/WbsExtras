@@ -1,4 +1,4 @@
-package wbs.extras.commands;
+package wbs.extras.commands.staff;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -203,8 +203,6 @@ public class CommandSpyCommand extends WbsMessenger implements CommandExecutor, 
 	public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
 		List<String> choices = new LinkedList<>();
 
-		
-		// TODO Update tab complete from default lastcommand syntax
 		if (sender.hasPermission(permission)) {
 			int length = args.length;
 			if (length == 1) {

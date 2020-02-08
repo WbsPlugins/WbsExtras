@@ -1,12 +1,10 @@
-package wbs.extras.commands;
+package wbs.extras.commands.misc;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -23,11 +21,14 @@ import wbs.extras.util.WbsPlugin;
 
 public class DisplayCommand extends WbsMessenger implements CommandExecutor, TabCompleter {
 	
-    protected DisplayCommand(WbsPlugin plugin) {
+    public DisplayCommand(WbsPlugin plugin) {
 		super(plugin);
+		
+		permission = plugin.getCommand("display").getPermission();
 	}
 
-
+    private String permission = null;
+    
 	@Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 		if (args.length == 0) {
@@ -48,6 +49,9 @@ public class DisplayCommand extends WbsMessenger implements CommandExecutor, Tab
 		}
  		switch (args[0].toUpperCase()) {
  		case "NAME": 
+ 			if (!checkPermission(sender, permission + ".name")) {
+ 				return true;
+ 			}
  			if (args.length >= 2) {
  				String[] nameStrings = new String[args.length - 1];
 				for (int i = 1; i < args.length; i++) {
@@ -61,6 +65,9 @@ public class DisplayCommand extends WbsMessenger implements CommandExecutor, Tab
  			item.setItemMeta(meta);
  			break;
  		case "SHINY": 
+ 			if (!checkPermission(sender, permission + ".shiny")) {
+ 				return true;
+ 			}
  			boolean add = false;
  			if (args.length >= 2) {
  				switch (args[1].toUpperCase()) {
@@ -99,6 +106,9 @@ public class DisplayCommand extends WbsMessenger implements CommandExecutor, Tab
  			}
  			break;
  		case "LORE": 
+ 			if (!checkPermission(sender, permission + ".lore")) {
+ 				return true;
+ 			}
  			if (args.length >= 2) {
 
 				String[] loreStrings = new String[args.length - 1];
@@ -121,9 +131,36 @@ public class DisplayCommand extends WbsMessenger implements CommandExecutor, Tab
 	return true;
     }
     
+	private final String[] OPTIONS = {"name", "shiny", "lore"};
     
     public List<String> onTabComplete(CommandSender sender, Command cmd, String label, String[] args) {
-        
-    	return new ArrayList<>();
+    	List<String> choices = new LinkedList<>();
+
+		if (sender.hasPermission(permission)) {
+			int length = args.length;
+			if (length == 1) {
+				for (String option : OPTIONS) {
+		 			if (sender.hasPermission(permission + "." + option)) {
+						choices.add(option);
+		 			}
+				}
+			}
+			
+			if (length == 2) {
+				if (args[0].equalsIgnoreCase("shiny")) {
+					choices.add("true");
+					choices.add("false");
+				}
+			}
+		}
+		
+    	List<String> result = new ArrayList<String>();
+		for (String add : choices) {
+    		if (add.toLowerCase().startsWith(args[args.length-1].toLowerCase())) {
+    			result.add(add);
+    		}
+		}
+		
+		return result;
 	}
 }

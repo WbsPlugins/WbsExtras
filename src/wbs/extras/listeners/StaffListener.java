@@ -3,17 +3,24 @@ package wbs.extras.listeners;
 import java.time.LocalDateTime;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.block.data.Openable;
+import org.bukkit.block.data.type.Door;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDropItemEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
 import wbs.extras.ExtrasSettings;
@@ -30,6 +37,46 @@ public class StaffListener extends WbsMessenger implements Listener {
 	public StaffListener(WbsExtras plugin) {
 		super(plugin);
 		settings = plugin.settings;
+	}
+	
+	/************************************************/
+	
+	@EventHandler(ignoreCancelled=true)
+	public void onIronDoorClick(PlayerInteractEvent event) {
+		if (!settings.bypassIronDoors()) {
+			return;
+		}
+		
+		if (event.getHand() != EquipmentSlot.HAND) {
+			return;
+		}
+		if (event.getAction() != Action.RIGHT_CLICK_BLOCK) {
+			return;
+		}
+		
+		ItemStack item = event.getItem();
+		if (item != null) {
+			return;
+		}
+		
+		Block block = event.getClickedBlock();
+		if (block == null) {
+			return;
+		}
+		if (block.getType() != Material.IRON_DOOR && block.getType() != Material.IRON_TRAPDOOR) {
+			return;
+		}
+		
+		Player player = event.getPlayer();
+		if (player.hasPermission("wbsextras.staff.irondoorbypass")) {
+			if (block.getBlockData() instanceof Openable) {
+				Openable door = (Openable) block.getBlockData();
+
+				door.setOpen(!door.isOpen());
+				
+				block.setBlockData(door);
+			}
+		}
 	}
 
 	/************************************************/
