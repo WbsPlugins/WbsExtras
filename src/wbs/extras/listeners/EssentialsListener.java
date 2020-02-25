@@ -42,6 +42,7 @@ public class EssentialsListener extends WbsMessenger implements Listener {
 		if (!settings.doEssentialsPAPIHook()) {
 			return;
 		}
+		
 
 		Player sender = event.getPlayer();
 		String message = PlaceholderAPIWrapper.setPlaceholders(sender, message);
