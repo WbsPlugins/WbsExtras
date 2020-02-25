@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -69,10 +70,11 @@ public class PlayerData implements Serializable {
 	/************************************************/
 	/*                Transient values				*/
 	/************************************************/
-	
+
 	public transient String signEditString = null;
 	public transient byte signEditLine = 0;
 	
+	public transient Material signType = null;
 	
 	/************************************************/
 	/*                 Chat Notifier                */

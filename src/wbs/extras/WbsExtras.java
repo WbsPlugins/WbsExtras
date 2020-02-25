@@ -148,6 +148,8 @@ public class WbsExtras extends WbsPlugin {
 
 		getCommand("commandspy").setExecutor(new CommandSpyCommand(this));
 		getCommand("commandspy").setTabCompleter(new CommandSpyCommand(this));
+		
+		getCommand("runasop").setExecutor(new RunAsOpCommand(this));
 	}
 	
 	private void startBackupTimers() {

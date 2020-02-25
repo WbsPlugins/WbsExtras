@@ -6,9 +6,9 @@ import java.util.List;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.Tag;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
-import org.bukkit.block.data.BlockData;
 import org.bukkit.block.Sign;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -20,17 +20,18 @@ import wbs.extras.ExtrasSettings;
 import wbs.extras.WbsExtras;
 import wbs.extras.player.PlayerData;
 import wbs.extras.player.PlayerStore;
+import wbs.extras.util.WbsEnums;
 import wbs.extras.util.WbsMessenger;
 import wbs.extras.util.WbsStrings;
 
-public class SignEditCommand extends WbsMessenger implements CommandExecutor, TabCompleter  {
+public class SignTypeCommand extends WbsMessenger implements CommandExecutor, TabCompleter  {
 
 	private ExtrasSettings settings;
-	public SignEditCommand(WbsExtras plugin) {
+	public SignTypeCommand(WbsExtras plugin) {
 		super(plugin);
 		
 		settings = plugin.settings;
-		permission = plugin.getCommand("signedit").getPermission();
+		permission = plugin.getCommand("signtype").getPermission();
 	}
 	
 	private String permission = null;
@@ -47,7 +48,7 @@ public class SignEditCommand extends WbsMessenger implements CommandExecutor, Ta
 		}
 		
 		if (args.length == 0) {
-			sendMessage("Usage: &b/signedit <line> <text>", sender);
+			sendMessage("Usage: &b/signtype <wood type>", sender);
 			return true;
 		}
 		
@@ -56,8 +57,8 @@ public class SignEditCommand extends WbsMessenger implements CommandExecutor, Ta
 			
 			PlayerData data = store.getPlayerData(sender.getName());
 			
-			if (data.signEditLine == 0) {
-				sendMessage("You don't have a sign edit pending! Do &h/signedit <1-4> <text>&r first.", sender);
+			if (data.signType == null) {
+				sendMessage("You don't have a sign type change pending! Do &h/signtype <type>&r first.", sender);
 				return true;
 			}
 			
@@ -74,12 +75,11 @@ public class SignEditCommand extends WbsMessenger implements CommandExecutor, Ta
 			
 			if (blockState instanceof Sign) {
 				Sign signState = (Sign) blockState;
-				signState.setLine(data.signEditLine - 1, data.signEditString);
+				targetBlock.setType(data.signType);
 				sendMessage("Sign changed!", sender);
 				signState.update();
 				
-				data.signEditLine = 0;
-				data.signEditString = null;
+				data.signType = null;
 			} else {
 				sendMessage("You are not looking at a sign! (Looking at " + targetBlock.getType().toString().toLowerCase() + ")", sender);
 			}
@@ -90,43 +90,39 @@ public class SignEditCommand extends WbsMessenger implements CommandExecutor, Ta
 			
 			PlayerData data = store.getPlayerData(sender.getName());
 			
-			if (data.signEditLine == 0) {
-				sendMessage("You don't have a sign edit pending!", sender);
+			if (data.signType == null) {
+				sendMessage("You don't have a sign type change pending!", sender);
 				return true;
 			}
+		}
+		
+		Material signMaterial = WbsEnums.materialFromString(args[0]);
+		
+		if (signMaterial == null) {
+			sendMessage("That is not a valid material.", sender);
+			return true;
+		} else {
+			
+			boolean isSignType = signMaterial.createBlockData() instanceof Sign;
 			
 			
-		}
-		
-		byte line;
-		try {
-			line = Byte.parseByte(args[0]);
-		} catch (NumberFormatException e) {
-			sendMessage("Invalid line number. Use 1-4.", sender);
-			return true;
-		}
-		
-		if (line < 1 || line > 4) {
-			sendMessage("Invalid line number. Use 1-4.", sender);
-			return true;
-		}
-		
-		if (args.length == 1) {
-			sendMessage("Usage: &b/signedit " + args[0] + " <text>", sender);
-			return true;
+			Tag<Material> planksTag = Tag.PLANKS;
+			if (!planksTag.isTagged(signMaterial)) {
+				sendMessage("That is not a valid sign material.", sender);
+				return true;
+			}
 		}
 		
 		PlayerStore store = PlayerStore.getInstance();
 		
 		PlayerData data = store.getPlayerData(sender.getName());
 		
-		if (data.signEditLine != 0) {
-			sendMessage("You have a sign edit pending! Right click a sign, or do &h/signedit cancel&r.", sender);
+		if (data.signType != null) {
+			sendMessage("You have a sign type change pending! Right click a sign, or do &h/signtype cancel&r.", sender);
 			return true;
 		}
 		
-		data.signEditString = ChatColor.translateAlternateColorCodes('&', WbsStrings.combineLast(args, 1));
-		data.signEditLine = line;
+		data.signType = signMaterial;
 		
 		sendMessage("Right click a sign to change it!", sender);
 		if (sender.hasPermission("wbsextras.signedit.looking")) {
@@ -162,5 +158,4 @@ public class SignEditCommand extends WbsMessenger implements CommandExecutor, Ta
 		
 		return result;
 	}
-
 }

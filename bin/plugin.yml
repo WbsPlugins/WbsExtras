@@ -54,9 +54,6 @@ commands:
   display:
     description: Change the appearance of the held item
     permission: wbsextras.misc.display
-  itemdata:
-    description: Alter the item data of a held item
-    permission: wbsextras.misc.itemdata
     
 permissions:
   wbsextras.notif.*:

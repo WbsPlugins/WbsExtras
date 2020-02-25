@@ -2,13 +2,10 @@ package wbs.extras.util;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
 import org.bukkit.ChatColor;
-
-import jdk.internal.joptsimple.internal.Strings;
 
 public abstract class WbsStrings {
 	

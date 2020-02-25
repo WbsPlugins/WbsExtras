@@ -1,5 +1,8 @@
 package wbs.extras.listeners;
 
+import java.util.Formatter;
+
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -7,6 +10,7 @@ import org.bukkit.event.Listener;
 import net.ess3.api.events.LocalChatSpyEvent;
 import wbs.extras.ExtrasSettings;
 import wbs.extras.WbsExtras;
+import wbs.extras.configurations.Replacement;
 import wbs.extras.util.WbsMessenger;
 
 public class EssentialsListener extends WbsMessenger implements Listener {
@@ -30,5 +34,17 @@ public class EssentialsListener extends WbsMessenger implements Listener {
 				return;
 			}
 		}
+		event.getPlayer();
+	}
+	
+	@EventHandler(priority=EventPriority.LOWEST)
+	public void localSpyPAPIHook(LocalChatSpyEvent event) {
+		if (!settings.doEssentialsPAPIHook()) {
+			return;
+		}
+
+		Player sender = event.getPlayer();
+		String message = PlaceholderAPIWrapper.setPlaceholders(sender, message);
+		event.setMessage(message);
 	}
 }

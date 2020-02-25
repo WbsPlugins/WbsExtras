@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 import org.bukkit.Bukkit;
 import org.bukkit.FireworkEffect;
@@ -246,6 +247,10 @@ public class MiscListener extends WbsMessenger implements Listener {
 
 	@EventHandler
 	public void onPotionThrow(PlayerInteractEvent event) {
+		if (!settings.cancelCustomPotions()) {
+			return;
+		}
+		
 		if (event.getHand() != EquipmentSlot.HAND) {
 			return;
 		}
@@ -272,6 +277,10 @@ public class MiscListener extends WbsMessenger implements Listener {
 	
 	@EventHandler
 	public void onDrinkPotion(PlayerItemConsumeEvent event) {
+		if (!settings.cancelCustomPotions()) {
+			return;
+		}
+		
 		ItemStack item = event.getItem();
 		
 		Player player = event.getPlayer();
@@ -284,6 +293,10 @@ public class MiscListener extends WbsMessenger implements Listener {
 	
 	@EventHandler
 	public void onDispense(BlockDispenseEvent event) {
+		if (!settings.cancelCustomPotions()) {
+			return;
+		}
+		
 		Block block = event.getBlock();
 		
 		if (block.getType() == Material.DISPENSER) {
@@ -417,6 +430,9 @@ public class MiscListener extends WbsMessenger implements Listener {
 	
 	@EventHandler
 	public void onCoralFade(BlockFadeEvent event) {
+		if (!settings.blockCoralFade) {
+			return;
+		}
 		Tag<Material> coralTag = Tag.CORALS;
 		Tag<Material> wallCoralTag = Tag.WALL_CORALS;
 		Tag<Material> coralBlocksTag = Tag.CORAL_BLOCKS;
@@ -441,37 +457,44 @@ public class MiscListener extends WbsMessenger implements Listener {
 		if (!settings.doVoteSleep()) {
 			return;
 		}
+
+		Player player = event.getPlayer();
+		boolean voteSleepWorld = false;
+		for (String worldName : settings.getVoteSleepWorlds()) {
+			if (player.getWorld().getName().equalsIgnoreCase(worldName)) {
+				voteSleepWorld = true;
+				break;
+			}
+		}
+		if (!voteSleepWorld) {
+			return;
+		}
+		
+		World world = player.getWorld();
+		List<Player> playersInWorld = world.getPlayers();
 		
 		if (event.getBedEnterResult().equals(BedEnterResult.OK)) {
-			Player player = event.getPlayer();
-			int amountSleeping = 1;
-			double playersNeeded = 0;
-			Collection<? extends Player> players = Bukkit.getOnlinePlayers();
-			for (Player p : players) {
-				if (p.getGameMode() == GameMode.SURVIVAL) {
-					playersNeeded++;
-					if (p.equals(player) ) {
-						continue;
-					}
-					if (p.isSleeping()) {
-						amountSleeping++;
-					}
-				}
-			}
+			
+			int amountSleeping = getPlayersSleepingInWorld(world) + 1;
+			double playersNeeded = getPlayersNeededInWorld(world);
 
 			int sleepPercent = settings.getSleepPercent();
 			
 			if (amountSleeping >= playersNeeded/100*(sleepPercent)) {
 				
-				broadcast(ChatColor.GOLD + player.getName() + " went to sleep. Good night everybody!");
-				World world = Bukkit.getWorld("spawn");
+				for (Player playerInWorld : playersInWorld) {
+					sendMessage(player.getName() + " went to sleep. Good night everybody!", playerInWorld);
+				}
+				
 				new BukkitRunnable() {
 					int escape = 0;
 					@Override
 		            public void run() {
 						world.setTime(world.getTime() + 50 % 24000);
-						if (world.getTime() < 12000 || escape > 1000 || !player.isSleeping()) {
+						// Players wake up at 23460. Slightly lower so skippingNight is still on to ignore messages.
+						if (world.getTime() > 23400 || world.getTime() < 1000 || escape > 5000) {
 							this.cancel();
+							world.setTime(23461);
 							world.setStorm(false);
 						}
 						escape++;
@@ -481,13 +504,45 @@ public class MiscListener extends WbsMessenger implements Listener {
 			} else {
 				String display;
 				if (amountSleeping == 1) {
-					display = ChatColor.GOLD + player.getName() + " wants to sleep. " + sleepPercent + "% of players must be in a bed to skip the night. (1/" + ((int) playersNeeded) + ")";
+					display = player.getName() + " wants to sleep. " + sleepPercent + "% of players must be in a bed to skip the night. (1/" + ((int) playersNeeded) + ")";
 				} else {
-					display = ChatColor.GOLD + player.getName() + " wants to sleep. (" + amountSleeping + "/" + ((int) playersNeeded) + ")";
+					display = player.getName() + " wants to sleep. (" + amountSleeping + "/" + ((int) playersNeeded) + ")";
 				}
-				broadcast(display);
+				
+				if (settings.voteSleepActionBar()) {
+					for (Player playerInWorld : playersInWorld) {
+						sendActionBar(display, playerInWorld);
+					}
+				} else {
+					for (Player playerInWorld : playersInWorld) {
+						sendMessage(display, playerInWorld);
+					}
+				}
 			}
 		}
+	}
+	
+	private int getPlayersNeededInWorld(World world) {
+		int playersNeeded = 0;
+		for (Player playerInWorld : world.getPlayers()) {
+			if (playerInWorld.getGameMode() == GameMode.SURVIVAL) {
+				playersNeeded++;
+			}
+		}
+		
+		return playersNeeded;
+	}
+	
+	private int getPlayersSleepingInWorld(World world) {
+		int amountSleeping = 0;
+		for (Player playerInWorld : world.getPlayers()) {
+			if (playerInWorld.getGameMode() == GameMode.SURVIVAL) {
+				if (playerInWorld.isSleeping()) {
+					amountSleeping++;
+				}
+			}
+		}
+		return amountSleeping;
 	}
 	
 	@EventHandler
@@ -495,25 +550,45 @@ public class MiscListener extends WbsMessenger implements Listener {
 		if (!settings.doVoteSleep()) {
 			return;
 		}
-		
+
 		Player player = event.getPlayer();
-		int amountSleeping = 0;
-		double playersNeeded = 0;
-		Collection<? extends Player> players = Bukkit.getOnlinePlayers();
-		for (Player p : players) {
-			if (p.getGameMode() == GameMode.SURVIVAL) {
-				playersNeeded++;
-				if (p.equals(player) ) {
-					continue;
+		boolean voteSleepWorld = false;
+		for (String worldName : settings.getVoteSleepWorlds()) {
+			if (player.getWorld().getName().equalsIgnoreCase(worldName)) {
+				voteSleepWorld = true;
+				break;
+			}
+		}
+		if (!voteSleepWorld) {
+			return;
+		}
+		
+		World world = player.getWorld();
+		List<Player> playersInWorld = world.getPlayers();
+
+		int amountSleeping = getPlayersSleepingInWorld(world);
+		double playersNeeded = getPlayersNeededInWorld(world);
+
+		int sleepPercent = settings.getSleepPercent();
+		
+		String display = "";
+		if (amountSleeping < playersNeeded/100*(sleepPercent)) {
+			if (world.getTime() > 23400 || world.getTime() < 50) {
+				return;
+			}
+			display = player.getName() + " left their bed. (" + amountSleeping + "/" + ((int) playersNeeded) + ")";
+
+
+			if (settings.voteSleepActionBar()) {
+				for (Player playerInWorld : playersInWorld) {
+					sendActionBar(display, playerInWorld);
 				}
-				if (p.isSleeping()) {
-					amountSleeping++;
+			} else {
+				for (Player playerInWorld : playersInWorld) {
+					sendMessage(display, playerInWorld);
 				}
 			}
 		}
-		
-		broadcast(ChatColor.GOLD + player.getName() + " left their bed. (" + amountSleeping + "/" + ((int) playersNeeded) + ")");
-
 	}
 	
 	/************************************************/
@@ -536,17 +611,25 @@ public class MiscListener extends WbsMessenger implements Listener {
 				tool = player.getInventory().getItemInOffHand();
 			}
 			if (tool.getType() == Material.FLINT_AND_STEEL || tool.getType() == Material.LAVA_BUCKET) {
-				for (Player check : Bukkit.getOnlinePlayers()) {
-					if (check.equals(player)) {
-						continue;
+				
+				double distance = settings.lavaPlaceDistance();
+				Predicate<Entity> predicate = new Predicate<Entity>() {
+					@Override
+					public boolean test(Entity entity) {
+						if (entity instanceof Player) {
+							if (((Player) entity).equals(player)) {
+								return false;
+							}
+							return true;
+						}
+						return false;
 					}
-					if (event.getClickedBlock().getWorld().equals(check.getWorld())) {
-					//	if (event.getClickedBlock().getLocation().distance(check.getLocation()) <= ASMain.lavaFireThreshold) {
-					//		event.setCancelled(true);
-					//		WbsExtras.sendMessage("&4You may not place lava or fire within " + ASMain.lavaFireThreshold + " blocks of another player", player);
-					//		return;
-					//	}
-					}
+				};
+				Collection<? extends Entity> nearbyPlayers = player.getWorld().getNearbyEntities(event.getClickedBlock().getLocation(), distance, distance, distance, predicate);
+				if (!nearbyPlayers.isEmpty()) {
+					event.setCancelled(true);
+					sendMessage("&wYou may not place lava or fire within " + distance + " blocks of another player", player);
+					return;
 				}
 			}
 		}
@@ -628,7 +711,7 @@ public class MiscListener extends WbsMessenger implements Listener {
 	
 	@EventHandler
 	public void PlayerInteractEvent(PlayerInteractEvent event) {
-		if (settings.blockSpawnerChange() == false) {
+		if (!settings.blockSpawnerChange()) {
 			return;
 		}
 		Player player = event.getPlayer();

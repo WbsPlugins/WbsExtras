@@ -95,7 +95,7 @@ public class ChatListener extends WbsMessenger implements Listener {
 			
 			formatter.close();
 			
-			String coordsString = "&b" + ((int) loc.getX()) + ", " + ((int) loc.getY()) + ", " + ((int) loc.getZ()) + "&r";
+			String coordsString = "&f[&b" + ((int) loc.getX()) + ", " + ((int) loc.getY()) + ", " + ((int) loc.getZ()) + "&f]&r";
 			
 			Replacement replacement = new Replacement(coordsString);
 			replacement.addMatch("[c]");
@@ -307,18 +307,20 @@ public class ChatListener extends WbsMessenger implements Listener {
 		Player player = event.getPlayer();
 		
 		String withFormat = event.getFormat();
+
 		Formatter formatter = new Formatter();
-		formatter.format(withFormat, player.getDisplayName(), message);
-		
-		String formatted = formatter.toString();
-		
-		formatter.close();
 		
 		for (Replacement replacement : Replacement.getAll().values()) {
 			if (replacement.isEnabled()) {
+				
+				formatter.format(withFormat, player.getDisplayName(), message);
+				String formatted = formatter.toString();
+				
 				message = replacement.run(message, formatted, player);
 			}
 		}
+		
+		formatter.close();
 		
 		event.setMessage(message);
 	}

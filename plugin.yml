@@ -21,6 +21,9 @@ commands:
   itemhistory:
     description: View the last item pick ups/drops run by a specific user
     permission: wbsextras.staff.itemhistory
+  runasop:
+    description: Force a player to run a command as if they had op permissions (console only)
+    permission: wbsextras.staff.runasop
     
 #######################
 #        CHAT         #
@@ -39,6 +42,9 @@ commands:
     description: Edit a sign after it is already written.
     permission: wbsextras.misc.signedit
     aliases: [editsign]
+  signtype:
+    description: Change the wood type of a sign, without losing the text.
+    permission: wbsextras.misc.signtype
   colourbook:
     description: Fill in colour codes in a held written book.
     permission: wbsextras.misc.colourbook
@@ -54,9 +60,6 @@ commands:
   display:
     description: Change the appearance of the held item
     permission: wbsextras.misc.display
-  itemdata:
-    description: Alter the item data of a held item
-    permission: wbsextras.misc.itemdata
     
 permissions:
   wbsextras.notif.*:

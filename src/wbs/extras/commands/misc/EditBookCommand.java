@@ -22,10 +22,13 @@ public class EditBookCommand extends WbsMessenger implements CommandExecutor {
 
 	public EditBookCommand(WbsPlugin plugin) {
 		super(plugin);
+		
+		permission = plugin.getCommand("colourbook").getPermission();
+		otherPerm = permission + ".other";
 	}
 	
-	private String permission = "wbsextras.editbook";
-	private String otherPerm = permission + ".other";
+	private String permission = "";
+	private String otherPerm = "";
 	
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {

@@ -1,5 +1,6 @@
 package wbs.extras.player;
 
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -135,6 +136,8 @@ public class PlayerStore {
 		} catch (FileNotFoundException e) {
 			logger.info("ERROR: The player data file was missing!");
 			e.printStackTrace();
+		} catch (EOFException e) {
+			logger.info("ERROR: The player data file was empty.");
 		} catch (IOException e) {
 			logger.info("ERROR: An unknown error occured while attempting to read player data.");
 			e.printStackTrace();

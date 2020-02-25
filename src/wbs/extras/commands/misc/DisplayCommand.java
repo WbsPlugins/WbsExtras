@@ -27,7 +27,7 @@ public class DisplayCommand extends WbsMessenger implements CommandExecutor, Tab
 		permission = plugin.getCommand("display").getPermission();
 	}
 
-    private String permission = null;
+    private String permission = "";
     
 	@Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {

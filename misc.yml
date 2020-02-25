@@ -52,11 +52,28 @@ item-cooldowns:
 vote-sleep:
   enabled: false
   percent-required: 50
+  use-actionbar: false # To prevent spam in chat, set to true to use the actionbar.
+  worlds: # List worlds that you want to enable vote sleeping in. Votes are per-world.
+  - world
+# - spawn 
 
 ########
 # Misc #
 ########
 
+# Sometimes plugins don't offer a way to turn off
+# their super spammy logging messages.
+# You can disable them here!
+# (PLEASE do not use this to hide errors unless you know
+# 100% of the time that error will be fine - errors are
+# usually there for a reason!)
+filter-console-messages:
+  enabled: false
+  ignore:
+  - '[SuperAnnoyingAndSpammyPluginThatWontTurnOffLogging]'
+  - 'issued server command: /login'
+
+# Not yet implemented.
 book-commands:
   enabled: false
   books:

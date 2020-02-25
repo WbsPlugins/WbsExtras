@@ -9,6 +9,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Logger;
+import org.apache.logging.log4j.core.LoggerContext;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -28,6 +31,7 @@ import wbs.extras.configurations.Replacement;
 import wbs.extras.util.WbsEnums;
 import wbs.extras.util.WbsPlugin;
 import wbs.extras.util.WbsSettings;
+import wbs.extras.configurations.WbsFilter;
 
 public class ExtrasSettings extends WbsSettings {
 
@@ -173,7 +177,9 @@ public class ExtrasSettings extends WbsSettings {
 			ConfigurationSection section = specs.getConfigurationSection(replacementName);
 			List<String> matches = section.getStringList("catch");
 			String replace = section.getString("replace");
+			boolean ignoreCase = section.getBoolean("ignore-case");
 			Replacement replacement = new Replacement(replace);
+			replacement.setIgnoreCase(ignoreCase);
 			
 			String permission = section.getString("permission", null);
 			replacement.setPermission(permission);
@@ -225,6 +231,8 @@ public class ExtrasSettings extends WbsSettings {
         if (voteSleep.getBoolean("enabled")) {
         	doVoteSleep = true;
         	voteSleepPercent = voteSleep.getInt("percent-required", 50);
+        	worlds = voteSleep.getStringList("worlds");
+        	voteSleepActionBar = voteSleep.getBoolean("use-actionbar");
         }
         
         ConfigurationSection worldTweaks = misc.getConfigurationSection("world-tweaks");
@@ -315,7 +323,27 @@ public class ExtrasSettings extends WbsSettings {
         		}
         	}
         }
+        
+        ConfigurationSection hideConsoleSpamSection = misc.getConfigurationSection("filter-console-messages");
+		if (hideConsoleSpamSection != null) {
+			if (hideConsoleSpamSection.getBoolean("enabled")) {
+				if (filter != null) {
+					filter.stop();
+				}
+				filter = new WbsFilter();
+
+				for (String ignoreString : hideConsoleSpamSection.getStringList("ignore")) {
+					filter.addIgnoreString(ignoreString);
+				}
+				
+				Logger rootLogger = (Logger) LogManager.getRootLogger();
+				rootLogger.addFilter(filter);
+			}
+		}
+
 	}
+	
+	private WbsFilter filter = null;
 
 	private boolean doItemCooldowns = false;
 	public boolean doItemCooldowns() {
@@ -443,6 +471,16 @@ public class ExtrasSettings extends WbsSettings {
 	private int voteSleepPercent = 50;
 	public int getSleepPercent() {
 		return voteSleepPercent;
+	}
+	
+	private List<String> worlds = new LinkedList<>();
+	public List<String> getVoteSleepWorlds() {
+		return worlds;
+	}
+	
+	private boolean voteSleepActionBar = false;
+	public boolean voteSleepActionBar() {
+		return voteSleepActionBar;
 	}
 	
 	// Damage indicator

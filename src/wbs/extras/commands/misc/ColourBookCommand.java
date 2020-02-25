@@ -26,10 +26,12 @@ public class ColourBookCommand extends WbsMessenger implements CommandExecutor {
 		super(plugin);
 		
 		settings = plugin.settings;
+		permission = plugin.getCommand("colourbook").getPermission();
+		otherPerm = permission + ".other";
 	}
 
-	private String permission = "wbsextras.colourbook";
-	private String otherPerm = permission + ".other";
+	private String permission = "";
+	private String otherPerm = "";
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {

@@ -30,6 +30,7 @@ public class Replacement {
 	private String replace;
 	private int maxPerMessage = 0;
 	private boolean enabled = true;
+	private boolean ignoreCase = true;
 	
 	public Replacement(String replace) {
 		this.replace = parseColours(replace);
@@ -55,6 +56,9 @@ public class Replacement {
 	public void addMatch(String match) {
 		this.match.add(parseColours(match));
 	}
+	public void setIgnoreCase(boolean ignoreCase) {
+		this.ignoreCase = ignoreCase;
+	}
 	
 	public boolean isEnabled() {
 		return enabled;
@@ -76,13 +80,32 @@ public class Replacement {
 	
 	public String replaceIn(String message, String formatted) {
 		
+		String preMessage = formatted.substring(0, formatted.length() - message.length());
+		
 		for (String caught : match) {
-			int firstIndex = message.indexOf(caught);
-			while (firstIndex != -1) {
-				String returnColours = ChatColor.getLastColors(formatted.substring(0, firstIndex-1 + (formatted.length() - message.length())));
-			
-				message = message.replaceFirst(Pattern.quote(caught), replace + returnColours);
+			int firstIndex = -1;
+			if (ignoreCase) {
+				firstIndex = message.toLowerCase().indexOf(caught.toLowerCase());
+			} else {
 				firstIndex = message.indexOf(caught);
+			}
+			while (firstIndex != -1) {
+				String returnColours = ChatColor.getLastColors(formatted.substring(0, firstIndex-1 + (preMessage.length())));
+
+				String beforeCatch = message.substring(0, firstIndex);
+				int afterCatchIndexStart = firstIndex + caught.length();
+				int afterCatchIndexFinish = message.length();
+				String afterCatch = message.substring(afterCatchIndexStart, afterCatchIndexFinish);
+				
+				message = beforeCatch + replace + returnColours + afterCatch;
+
+				formatted = preMessage + message;
+				
+				if (ignoreCase) {
+					firstIndex = message.toLowerCase().indexOf(caught.toLowerCase());
+				} else {
+					firstIndex = message.indexOf(caught);
+				}
 			}
 		}
 		return message;

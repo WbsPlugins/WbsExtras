@@ -5,10 +5,10 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 // This class can be extended so I can be lazy and not have to write plugin. before methods c:
-public class WbsMessenger {
+public abstract class WbsMessenger {
 	
 	protected WbsPlugin plugin;
-	protected WbsMessenger(WbsPlugin plugin) {
+	public WbsMessenger(WbsPlugin plugin) {
 		this.plugin = plugin;
 	}
 	
