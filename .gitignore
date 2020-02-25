@@ -1,8 +1,6 @@
-/chat.yml
-/config.yml
-/misc.yml
-/plugin.yml
-/staff.yml
-/wbs/
-/bin/
-/target/
+bin/
+.settings/
+.externalToolBuilders/
+.classpath
+.gitignore
+target/
