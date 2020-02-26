@@ -14,9 +14,10 @@ import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import net.md_5.bungee.api.ChatColor;
-import wbs.extras.util.WbsMessenger;
-import wbs.extras.util.WbsPlugin;
-import wbs.extras.util.WbsStrings;
+
+import wbs.utils.util.plugin.WbsMessenger;
+import wbs.utils.util.plugin.WbsPlugin;
+import wbs.utils.util.string.WbsStrings;
 
 public class EditBookCommand extends WbsMessenger implements CommandExecutor {
 

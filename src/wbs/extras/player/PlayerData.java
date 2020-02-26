@@ -21,9 +21,11 @@ import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.HoverEvent.Action;
 import wbs.extras.ExtrasSettings;
 import wbs.extras.WbsExtras;
-import wbs.extras.util.RomanNumerals;
-import wbs.extras.util.WbsStrings;
-import wbs.extras.util.WbsTime;
+
+import wbs.utils.util.WbsTime;
+import wbs.utils.util.string.RomanNumerals;
+import wbs.utils.util.string.WbsStringify;
+import wbs.utils.util.string.WbsStrings;
 
 public class PlayerData implements Serializable {
 
@@ -260,7 +262,7 @@ public class PlayerData implements Serializable {
 		
 		BaseComponent[] itemText = 
 				new ComponentBuilder("").append(textChat)
-				.append(" (" + WbsTime.prettyTime(LocalDateTime.now()) + ")").color(ChatColor.GRAY)
+				.append(" (" + WbsStringify.toString(LocalDateTime.now()) + ")").color(ChatColor.GRAY)
 				.create();
 		
 		itemHistory.add(itemText);

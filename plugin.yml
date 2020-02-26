@@ -3,6 +3,7 @@ name: WbsExtras
 version: 1.0.0
 api-version: 1.13
 author: Weber588
+depend: [WbsUtils]
 description: A variety of configurable options for various servers 
 commands:
 

@@ -4,12 +4,10 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.regex.Pattern;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Formatter;
 
-import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Sound;
@@ -20,14 +18,13 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.server.TabCompleteEvent;
 
-import net.ess3.api.events.LocalChatSpyEvent;
 import wbs.extras.ExtrasSettings;
 import wbs.extras.WbsExtras;
 import wbs.extras.configurations.Replacement;
 import wbs.extras.player.PlayerData;
 import wbs.extras.player.PlayerStore;
-import wbs.extras.util.WbsMessenger;
-import wbs.extras.util.WbsPlugin;
+
+import wbs.utils.util.plugin.WbsMessenger;
 
 public class ChatListener extends WbsMessenger implements Listener {
 

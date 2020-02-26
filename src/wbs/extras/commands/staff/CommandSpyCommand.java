@@ -3,26 +3,19 @@ package wbs.extras.commands.staff;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Keyed;
-import org.bukkit.NamespacedKey;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
 import wbs.extras.ExtrasSettings;
 import wbs.extras.WbsExtras;
 import wbs.extras.player.PlayerData;
 import wbs.extras.player.PlayerStore;
-import wbs.extras.util.WbsMessenger;
-import wbs.extras.util.WbsPlugin;
+import wbs.utils.util.plugin.WbsMessenger;
 
 public class CommandSpyCommand extends WbsMessenger implements CommandExecutor, TabCompleter  {
 

@@ -12,8 +12,9 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
 import wbs.extras.ExtrasSettings;
-import wbs.extras.util.WbsMessenger;
 import wbs.extras.WbsExtras;
+
+import wbs.utils.util.plugin.WbsMessenger;
 
 public class FreezeCommand extends WbsMessenger implements CommandExecutor, TabCompleter {
 

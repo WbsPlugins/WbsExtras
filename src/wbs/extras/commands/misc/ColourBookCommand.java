@@ -3,21 +3,21 @@ package wbs.extras.commands.misc;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import net.md_5.bungee.api.ChatColor;
+
 import wbs.extras.ExtrasSettings;
 import wbs.extras.WbsExtras;
-import wbs.extras.util.WbsMessenger;
+
+import wbs.utils.util.plugin.WbsMessenger;
 
 public class ColourBookCommand extends WbsMessenger implements CommandExecutor {
 

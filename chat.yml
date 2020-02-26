@@ -21,6 +21,10 @@ grave-highlighting:
 chat-coords:
   enabled: false
   permission: 'wbsextras.chat.coords'
+  
+# Enabling this will try to allow you to use PlaceholderAPI hooks in Essentials localspy messages seen by staff.
+placeholder-essentials-spy:
+  enabled: false
 
 # This option notifies players of words in chat.
 # Notifications are per-player, and won't change messages for other players.

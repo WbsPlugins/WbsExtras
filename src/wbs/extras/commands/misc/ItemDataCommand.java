@@ -12,8 +12,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import wbs.extras.util.WbsMessenger;
-import wbs.extras.util.WbsPlugin;
+import wbs.utils.util.plugin.WbsMessenger;
+import wbs.utils.util.plugin.WbsPlugin;
 
 public class ItemDataCommand extends WbsMessenger implements CommandExecutor, TabCompleter {
 

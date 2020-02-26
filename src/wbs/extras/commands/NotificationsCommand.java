@@ -11,10 +11,11 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
 import wbs.extras.ExtrasSettings;
-import wbs.extras.util.WbsMessenger;
 import wbs.extras.WbsExtras;
 import wbs.extras.player.PlayerData;
 import wbs.extras.player.PlayerStore;
+
+import wbs.utils.util.plugin.WbsMessenger;
 
 public class NotificationsCommand extends WbsMessenger implements CommandExecutor, TabCompleter {
 

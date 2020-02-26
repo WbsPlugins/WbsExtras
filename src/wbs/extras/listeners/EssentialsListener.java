@@ -2,16 +2,21 @@ package wbs.extras.listeners;
 
 import java.util.Formatter;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerChatEvent;
 
 import net.ess3.api.events.LocalChatSpyEvent;
 import wbs.extras.ExtrasSettings;
 import wbs.extras.WbsExtras;
 import wbs.extras.configurations.Replacement;
-import wbs.extras.util.WbsMessenger;
+
+import wbs.utils.util.pluginhooks.PlaceholderAPIWrapper;
+import wbs.utils.util.plugin.WbsMessenger;
 
 public class EssentialsListener extends WbsMessenger implements Listener {
 
@@ -43,9 +48,31 @@ public class EssentialsListener extends WbsMessenger implements Listener {
 			return;
 		}
 		
+		event.setCancelled(true);
+	}
+	
+	@EventHandler(priority=EventPriority.HIGHEST)
+	public void catchChatForLocalSpy(AsyncPlayerChatEvent event) {
+		if (!settings.doEssentialsPAPIHook()) {
+			return;
+		}
+
+		String format = event.getFormat();
 
 		Player sender = event.getPlayer();
-		String message = PlaceholderAPIWrapper.setPlaceholders(sender, message);
-		event.setMessage(message);
+		format = PlaceholderAPIWrapper.setPlaceholders(sender, format);
+
+		String message = event.getMessage();
+		Formatter formatter = new Formatter();
+		
+		String fullMessage = formatter.format(format, sender, message).toString();
+		
+		formatter.close();
+		
+		for (Player player : Bukkit.getOnlinePlayers()) {
+			if (player.hasPermission("essentials.chat.spy")) {
+				sendMessage(fullMessage, player);
+			}
+		}
 	}
 }

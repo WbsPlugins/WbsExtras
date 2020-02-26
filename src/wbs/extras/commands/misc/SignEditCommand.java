@@ -20,8 +20,9 @@ import wbs.extras.ExtrasSettings;
 import wbs.extras.WbsExtras;
 import wbs.extras.player.PlayerData;
 import wbs.extras.player.PlayerStore;
-import wbs.extras.util.WbsMessenger;
-import wbs.extras.util.WbsStrings;
+
+import wbs.utils.util.plugin.WbsMessenger;
+import wbs.utils.util.string.WbsStrings;
 
 public class SignEditCommand extends WbsMessenger implements CommandExecutor, TabCompleter  {
 

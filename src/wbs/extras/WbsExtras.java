@@ -26,7 +26,7 @@ import wbs.extras.player.PlayerStore;
 import wbs.extras.player.PlayerData;
 import wbs.extras.player.PlayerDataAdapter;
 
-import wbs.extras.util.WbsPlugin;
+import wbs.utils.util.plugin.WbsPlugin;
 
 public class WbsExtras extends WbsPlugin {
 	

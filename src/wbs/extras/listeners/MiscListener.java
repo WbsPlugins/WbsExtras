@@ -2,15 +2,12 @@ package wbs.extras.listeners;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.temporal.TemporalUnit;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
-import org.bukkit.Bukkit;
-import org.bukkit.FireworkEffect;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -36,7 +33,6 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockDispenseEvent;
 import org.bukkit.event.block.BlockFadeEvent;
-import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.ExplosionPrimeEvent;
@@ -55,29 +51,24 @@ import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.inventory.meta.SpawnEggMeta;
-import org.bukkit.metadata.FixedMetadataValue;
-import org.bukkit.metadata.MetadataValue;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.potion.Potion;
 import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionType;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.util.Vector;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 
 import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.ChatMessageType;
-import net.md_5.bungee.api.chat.ComponentBuilder;
+
 import wbs.extras.ExtrasSettings;
 import wbs.extras.WbsExtras;
 import wbs.extras.configurations.BarAnnouncement;
 import wbs.extras.player.PlayerData;
 import wbs.extras.player.PlayerStore;
-import wbs.extras.util.WbsMessenger;
-import wbs.extras.util.WbsStrings;
-import wbs.extras.util.WbsTime;
+
+import wbs.utils.util.plugin.WbsMessenger;
+import wbs.utils.util.string.WbsStringify;
+import wbs.utils.util.string.WbsStrings;
 
 public class MiscListener extends WbsMessenger implements Listener {
 
@@ -185,7 +176,7 @@ public class MiscListener extends WbsMessenger implements Listener {
 				if (between.toMillis() / 50 < cooldown) {
 					LocalDateTime unlockTime = lastUse.plusNanos((long) (cooldown / 20 * 1000000000.0));
 					Duration timeLeft = Duration.between(LocalDateTime.now(), unlockTime);
-					String timeLeftString = WbsTime.prettyTime(timeLeft);
+					String timeLeftString = WbsStringify.toString(timeLeft, false);
 					sendActionBar("&cYou can use that again in " + timeLeftString + ".", player);
 					event.setCancelled(true);
 				} else {

@@ -13,11 +13,13 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
 import net.md_5.bungee.api.chat.BaseComponent;
-import wbs.extras.util.WbsMessenger;
+
 import wbs.extras.ExtrasSettings;
 import wbs.extras.WbsExtras;
 import wbs.extras.player.PlayerData;
 import wbs.extras.player.PlayerStore;
+
+import wbs.utils.util.plugin.WbsMessenger;
 
 public class ItemHistoryCommand extends WbsMessenger implements CommandExecutor, TabCompleter {
 

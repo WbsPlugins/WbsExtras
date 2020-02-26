@@ -7,9 +7,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 
-import wbs.extras.util.WbsMessenger;
-import wbs.extras.util.WbsPlugin;
-import wbs.extras.util.WbsStrings;
+import wbs.utils.util.plugin.WbsMessenger;
+import wbs.utils.util.plugin.WbsPlugin;
+import wbs.utils.util.string.WbsStrings;
 
 public class RunAsOpCommand extends WbsMessenger implements CommandExecutor {
 

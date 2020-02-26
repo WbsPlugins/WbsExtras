@@ -7,8 +7,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-import wbs.extras.util.WbsMessenger;
-import wbs.extras.util.WbsPlugin;
+import wbs.utils.util.plugin.WbsMessenger;
+import wbs.utils.util.plugin.WbsPlugin;
 
 public class NightVisionCommand extends WbsMessenger implements CommandExecutor {
 

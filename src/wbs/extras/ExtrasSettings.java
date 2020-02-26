@@ -11,7 +11,7 @@ import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
-import org.apache.logging.log4j.core.LoggerContext;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -21,17 +21,17 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
-import org.bukkit.inventory.meta.ItemMeta;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
 import wbs.extras.configurations.BarAnnouncement;
 import wbs.extras.configurations.Replacement;
-import wbs.extras.util.WbsEnums;
-import wbs.extras.util.WbsPlugin;
-import wbs.extras.util.WbsSettings;
 import wbs.extras.configurations.WbsFilter;
+
+import wbs.utils.util.WbsEnums;
+import wbs.utils.util.plugin.WbsPlugin;
+import wbs.utils.util.plugin.WbsSettings;
 
 public class ExtrasSettings extends WbsSettings {
 
@@ -137,6 +137,15 @@ public class ExtrasSettings extends WbsSettings {
 			chatCoordsPerm = chatCoords.getString("permission", chatCoordsPerm);
 		}
 
+		ConfigurationSection papiEssentials = chat.getConfigurationSection("placeholder-essentials-spy");
+		if (papiEssentials != null) {
+			doEssentialsPAPIHook = papiEssentials.getBoolean("enabled", false);
+		}
+	}
+	
+	private boolean doEssentialsPAPIHook = false;
+	public boolean doEssentialsPAPIHook() {
+		return doEssentialsPAPIHook;
 	}
 	
 	private Map<String, Multimap<Integer, String>> extraTabs = new HashMap<>();

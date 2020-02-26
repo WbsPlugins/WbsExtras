@@ -15,7 +15,8 @@ import wbs.extras.ExtrasSettings;
 import wbs.extras.WbsExtras;
 import wbs.extras.player.PlayerData;
 import wbs.extras.player.PlayerStore;
-import wbs.extras.util.WbsMessenger;
+
+import wbs.utils.util.plugin.WbsMessenger;
 
 public class LastCommandCommand extends WbsMessenger implements CommandExecutor, TabCompleter {
 

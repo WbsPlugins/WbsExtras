@@ -27,8 +27,10 @@ import wbs.extras.ExtrasSettings;
 import wbs.extras.WbsExtras;
 import wbs.extras.player.PlayerData;
 import wbs.extras.player.PlayerStore;
-import wbs.extras.util.WbsMessenger;
-import wbs.extras.util.WbsTime;
+
+import wbs.utils.util.plugin.WbsMessenger;
+import wbs.utils.util.string.WbsStringify;
+import wbs.utils.util.WbsTime;
 
 public class StaffListener extends WbsMessenger implements Listener {
 
@@ -236,6 +238,6 @@ public class StaffListener extends WbsMessenger implements Listener {
 		
 		LocalDateTime timeStamp = LocalDateTime.now();
 		
-		data.addCommand(command + " &7(" + WbsTime.prettyTime(timeStamp) + ")");
+		data.addCommand(command + " &7(" + WbsStringify.toString(timeStamp) + ")");
 	}
 }
